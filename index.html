@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auditoria de Carrinho · Kuehne+Nagel</title>
+<style>
+  :root{
+    --navy-900:#0B1F3A;
+    --navy-800:#122A4C;
+    --navy-700:#17355E;
+    --navy-500:#2C5490;
+    --paper:#EEF1F5;
+    --card:#FFFFFF;
+    --ink:#17202B;
+    --muted:#647085;
+    --line:#DCE1E8;
+    --auditando:#1C7F6B;
+    --almoco:#C0810F;
+    --lider:#6A4E9E;
+    --ausente:#B0432B;
+    --outro:#51617A;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(11,31,58,.06), 0 1px 1px rgba(11,31,58,.04);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  button, input, select, textarea{font-family:inherit;}
+  button{cursor:pointer;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    background:linear-gradient(180deg,var(--navy-900),var(--navy-800));
+    color:#fff;
+    padding:18px 20px 16px;
+  }
+  .topbar-inner{max-width:1180px;margin:0 auto;}
+  .brand{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  .brand h1{font-size:20px;font-weight:700;letter-spacing:.2px;margin:0;}
+  .brand .mark{font-size:11px;letter-spacing:2px;color:#9FB2CE;font-weight:600;}
+  .brand .mark b{color:#fff;}
+
+  .controls-row{
+    margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
+  }
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:11px;color:#B9C6DA;}
+  .field input[type=date]{
+    background:#0F294B;border:1px solid #29456E;color:#fff;border-radius:8px;
+    padding:8px 10px;font-size:14px;
+  }
+  .segmented{display:flex;background:#0F294B;border:1px solid #29456E;border-radius:8px;overflow:hidden;}
+  .segmented button{
+    background:transparent;border:none;color:#B9C6DA;padding:8px 14px;font-size:13px;font-weight:600;
+  }
+  .segmented button.active{background:var(--navy-500);color:#fff;}
+  .search{flex:1;min-width:180px;}
+  .search input{
+    width:100%;background:#0F294B;border:1px solid #29456E;color:#fff;border-radius:8px;
+    padding:8px 10px;font-size:14px;
+  }
+  .search input::placeholder{color:#8095B3;}
+
+  .stats-row{max-width:1180px;margin:14px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .stat-card{
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;
+    padding:10px 14px;
+  }
+  .stat-card .n{font-size:22px;font-weight:700;line-height:1;}
+  .stat-card .l{font-size:11px;color:#B9C6DA;margin-top:4px;}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    max-width:1180px;margin:16px auto 0;padding:0 20px;display:flex;gap:4px;border-bottom:1px solid var(--line);
+  }
+  .tab-btn{
+    background:none;border:none;padding:10px 16px;font-size:14px;font-weight:600;color:var(--muted);
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+  }
+  .tab-btn.active{color:var(--navy-800);border-bottom-color:var(--navy-500);}
+
+  main{max-width:1180px;margin:0 auto;padding:18px 20px 60px;}
+  section[hidden]{display:none;}
+
+  /* ---------- Employee list (Auditoria de Hoje) ---------- */
+  .empty{
+    background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:30px 20px;text-align:center;color:var(--muted);font-size:14px;
+  }
+  .row-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);
+  }
+  .row-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .who{display:flex;align-items:center;gap:10px;min-width:180px;}
+  .avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--navy-700);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;
+  }
+  .who-name{font-size:14px;font-weight:700;}
+  .who-meta{font-size:12px;color:var(--muted);}
+  .badge{
+    font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;white-space:nowrap;
+  }
+  .last-check{font-size:12px;color:var(--muted);text-align:right;}
+
+  .status-group{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+  .status-btn{
+    border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:600;
+    color:var(--ink);
+  }
+  .status-btn.sel{color:#fff;border-color:transparent;}
+
+  .form-line{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:flex-end;}
+  .form-field{display:flex;flex-direction:column;gap:4px;}
+  .form-field label{font-size:11px;color:var(--muted);font-weight:600;}
+  .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .stepper button{background:var(--paper);border:none;width:28px;height:32px;font-size:16px;color:var(--navy-800);}
+  .stepper input{
+    width:56px;text-align:center;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);
+    height:32px;font-size:14px;
+  }
+  .justif{flex:1;min-width:200px;}
+  .justif textarea, .justif input{
+    width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:13px;resize:none;
+  }
+  .save-btn{
+    background:var(--navy-800);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;
+    height:32px;
+  }
+  .save-btn:hover{background:var(--navy-700);}
+  .history-toggle{font-size:12px;color:var(--navy-500);background:none;border:none;padding:0;margin-top:8px;font-weight:600;}
+  .history{margin-top:8px;border-top:1px solid var(--line);padding-top:8px;}
+  .history table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .history th{text-align:left;color:var(--muted);font-weight:600;padding:4px 6px;}
+  .history td{padding:4px 6px;border-top:1px solid var(--line);}
+  .history .del{background:none;border:none;color:var(--ausente);cursor:pointer;font-size:12px;}
+
+  /* ---------- Colaboradores tab ---------- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .panel h3{margin:0 0 4px;font-size:15px;}
+  .panel p.hint{margin:0 0 12px;font-size:12.5px;color:var(--muted);}
+  .grid-form{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:8px;align-items:end;}
+  .grid-form .form-field{display:flex;flex-direction:column;gap:4px;}
+  .grid-form label{font-size:11px;color:var(--muted);font-weight:600;}
+  .grid-form input, .grid-form select{
+    border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:13px;
+  }
+  textarea.paste{
+    width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12.5px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+  table.emp-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;}
+  table.emp-table th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;padding:6px 8px;border-bottom:1px solid var(--line);}
+  table.emp-table td{padding:7px 8px;border-bottom:1px solid var(--line);}
+  table.emp-table tr:hover td{background:var(--paper);}
+  .icon-btn{background:none;border:none;color:var(--muted);font-size:13px;padding:2px 6px;}
+  .icon-btn.danger{color:var(--ausente);}
+
+  /* ---------- Relatorios tab ---------- */
+  .report-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;}
+  .report-toolbar .field label{color:var(--muted);}
+  .report-toolbar .field input, .report-toolbar select{
+    border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:13px;
+  }
+  .btn-outline{
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;
+    color:var(--navy-800);
+  }
+  .btn-outline:hover{background:var(--paper);}
+  table.report-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  table.report-table th{text-align:left;background:var(--navy-900);color:#fff;font-weight:600;font-size:11.5px;padding:9px 10px;}
+  table.report-table td{padding:8px 10px;border-bottom:1px solid var(--line);}
+  table.report-table tr:last-child td{border-bottom:none;}
+  table.report-table tfoot td{font-weight:700;background:var(--paper);}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .exp-row{cursor:pointer;}
+  .exp-row:hover td{background:var(--paper);}
+  .detail-row td{background:#F8FAFC;padding:0;}
+  .detail-inner{padding:10px 16px;}
+  .detail-inner table{width:100%;font-size:12px;border-collapse:collapse;}
+  .detail-inner th{text-align:left;color:var(--muted);padding:3px 6px;}
+  .detail-inner td{padding:3px 6px;border-top:1px solid var(--line);}
+
+  @media (max-width:720px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .grid-form{grid-template-columns:1fr 1fr;}
+    .row-top{flex-direction:column;align-items:flex-start;}
+    .last-check{text-align:left;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <h1>Auditoria de Carrinho</h1>
+      <div class="mark"><b>KUEHNE+NAGEL</b> · Operação Meli</div>
+    </div>
+    <div class="controls-row">
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="audit-date">
+      </div>
+      <div class="field">
+        <label>Turno</label>
+        <div class="segmented" id="turno-filter">
+          <button data-v="TODOS" class="active">Todos</button>
+          <button data-v="AM">AM</button>
+          <button data-v="PM">PM</button>
+          <button data-v="SD">SD</button>
+          <button data-v="AM0">AM0</button>
+        </div>
+      </div>
+      <div class="field search">
+        <label>Buscar colaborador</label>
+        <input type="text" id="search-box" placeholder="Nome ou matrícula...">
+      </div>
+    </div>
+    <div class="stats-row" id="stats-row"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="hoje">Auditoria de Hoje</button>
+  <button class="tab-btn" data-tab="colab">Colaboradores</button>
+  <button class="tab-btn" data-tab="rel">Relatórios</button>
+</div>
+
+<main>
+  <section id="tab-hoje"><div id="emp-list"></div></section>
+
+  <section id="tab-colab" hidden>
+    <div class="panel">
+      <h3>Adicionar colaborador</h3>
+      <p class="hint">Cadastre manualmente ou importe colando várias linhas da planilha (Nome, Matrícula, Cargo, Turno, Escala — separados por tabulação).</p>
+      <div class="grid-form">
+        <div class="form-field"><label>Nome</label><input id="f-nome" type="text"></div>
+        <div class="form-field"><label>Matrícula</label><input id="f-mat" type="text"></div>
+        <div class="form-field"><label>Cargo</label><input id="f-cargo" type="text"></div>
+        <div class="form-field"><label>Turno</label>
+          <select id="f-turno"><option>AM</option><option>PM</option><option>SD</option><option>AM0</option></select>
+        </div>
+        <div class="form-field"><label>Escala</label>
+          <select id="f-escala"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        </div>
+        <button class="save-btn" id="btn-add-emp">Adicionar</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Importar em lote</h3>
+      <p class="hint">Cole as linhas no formato: Nome [TAB] Matrícula [TAB] Cargo [TAB] Turno [TAB] Escala</p>
+      <textarea class="paste" id="paste-box" placeholder="Ex: João Silva&#9;12345&#9;Conferente&#9;AM&#9;A"></textarea>
+      <div style="margin-top:8px;"><button class="save-btn" id="btn-import">Importar linhas</button></div>
+    </div>
+
+    <div class="panel">
+      <h3>Colaboradores cadastrados (<span id="emp-count">0</span>)</h3>
+      <table class="emp-table">
+        <thead><tr><th>Nome</th><th>Matrícula</th><th>Cargo</th><th>Turno</th><th>Escala</th><th></th></tr></thead>
+        <tbody id="emp-table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-rel" hidden>
+    <div class="report-toolbar">
+      <div class="field"><label>Período</label>
+        <div class="segmented" id="periodo-toggle">
+          <button data-v="dia" class="active">Dia</button>
+          <button data-v="semana">Semana</button>
+          <button data-v="mes">Mês</button>
+        </div>
+      </div>
+      <div class="field"><label>Data de referência</label><input type="date" id="report-date"></div>
+      <button class="btn-outline" id="btn-csv">Exportar CSV</button>
+      <button class="btn-outline" id="btn-print">Imprimir</button>
+    </div>
+    <div id="report-range" style="font-size:13px;color:var(--muted);margin-bottom:8px;"></div>
+    <div style="overflow-x:auto;">
+      <table class="report-table" id="report-table">
+        <thead><tr>
+          <th>Colaborador</th><th>Cargo</th><th class="num">Checagens</th><th class="num">Gaiolas auditadas</th>
+          <th class="num">Almoço</th><th class="num">Ativ. Líder</th><th class="num">Ausente</th><th class="num">Outro</th><th>Última justificativa</th>
+        </tr></thead>
+        <tbody id="report-body"></tbody>
+        <tfoot id="report-foot"></tfoot>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  var STATUS = {
+    auditando: {label:'Auditando', color:'var(--auditando)', needsJust:false},
+    almoco:    {label:'Almoço', color:'var(--almoco)', needsJust:true},
+    lider:     {label:'Atividade do Líder', color:'var(--lider)', needsJust:true},
+    ausente:   {label:'Ausente', color:'var(--ausente)', needsJust:true},
+    outro:     {label:'Outro', color:'var(--outro)', needsJust:true}
+  };
+  var STATUS_ORDER = ['auditando','almoco','lider','ausente','outro'];
+
+  var LS_EMP = 'acx_employees';
+  var LS_LOG = 'acx_log';
+
+  function load(key){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch(e){ return []; } }
+  function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+  var employees = load(LS_EMP);
+  var log = load(LS_LOG);
+
+  function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function toISODate(d){
+    var y=d.getFullYear(), m=(''+(d.getMonth()+1)).padStart(2,'0'), day=(''+d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+  function todayISO(){ return toISODate(new Date()); }
+  function nowHM(){
+    var d=new Date();
+    return (''+d.getHours()).padStart(2,'0')+':'+(''+d.getMinutes()).padStart(2,'0');
+  }
+
+  function initials(name){
+    var parts = name.trim().split(/\s+/);
+    var a = parts[0] ? parts[0][0] : '';
+    var b = parts.length>1 ? parts[parts.length-1][0] : '';
+    return (a+b).toUpperCase();
+  }
+
+  // ---------- State ----------
+  var state = {
+    date: todayISO(),
+    turno: 'TODOS',
+    search: '',
+    reportPeriod: 'dia',
+    reportDate: todayISO()
+  };
+
+  var dateInput = document.getElementById('audit-date');
+  dateInput.value = state.date;
+  var reportDateInput = document.getElementById('report-date');
+  reportDateInput.value = state.reportDate;
+
+  dateInput.addEventListener('change', function(){ state.date = dateInput.value || todayISO(); renderEmpList(); });
+  document.getElementById('search-box').addEventListener('input', function(e){ state.search = e.target.value.toLowerCase(); renderEmpList(); });
+
+  document.querySelectorAll('#turno-filter button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#turno-filter button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.turno = btn.getAttribute('data-v');
+      renderEmpList();
+    });
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var tab = btn.getAttribute('data-tab');
+      ['hoje','colab','rel'].forEach(function(t){
+        document.getElementById('tab-'+t).hidden = (t !== tab);
+      });
+      if(tab==='colab') renderEmpTable();
+      if(tab==='rel') renderReport();
+    });
+  });
+
+  // ---------- Log helpers ----------
+  function entriesFor(employeeId, date){
+    return log.filter(function(e){ return e.employeeId===employeeId && e.date===date; })
+               .sort(function(a,b){ return a.time < b.time ? -1 : (a.time > b.time ? 1 : 0); });
+  }
+  function lastEntry(employeeId, date){
+    var es = entriesFor(employeeId, date);
+    return es.length ? es[es.length-1] : null;
+  }
+  function dailyTotalGaiolas(employeeId, date){
+    return entriesFor(employeeId, date).reduce(function(s,e){ return s + (Number(e.gaiolas)||0); }, 0);
+  }
+
+  // ---------- Stats ----------
+  function renderStats(){
+    var list = filteredEmployees();
+    var total = list.length;
+    var auditando=0, pausa=0, gaiolas=0;
+    list.forEach(function(emp){
+      var le = lastEntry(emp.id, state.date);
+      var st = le ? le.status : 'auditando';
+      if(st==='auditando') auditando++; else pausa++;
+      gaiolas += dailyTotalGaiolas(emp.id, state.date);
+    });
+    var html = '';
+    html += statCard(total, 'Colaboradores no filtro');
+    html += statCard(auditando, 'Em auditoria agora');
+    html += statCard(pausa, 'Em pausa / outra atividade');
+    html += statCard(gaiolas, 'Gaiolas auditadas hoje');
+    document.getElementById('stats-row').innerHTML = html;
+  }
+  function statCard(n,l){
+    return '<div class="stat-card"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
+  }
+
+  // ---------- Employees filter ----------
+  function filteredEmployees(){
+    return employees.filter(function(emp){
+      if(state.turno !== 'TODOS' && emp.turno !== state.turno) return false;
+      if(state.search){
+        var hay = (emp.nome+' '+emp.matricula).toLowerCase();
+        if(hay.indexOf(state.search) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  // ---------- Render employee list (Auditoria de Hoje) ----------
+  var openHistory = {};
+
+  function renderEmpList(){
+    renderStats();
+    var list = filteredEmployees();
+    var container = document.getElementById('emp-list');
+    if(employees.length === 0){
+      container.innerHTML = '<div class="empty">Nenhum colaborador cadastrado ainda. Vá até a aba <strong>Colaboradores</strong> para adicionar o time.</div>';
+      return;
+    }
+    if(list.length === 0){
+      container.innerHTML = '<div class="empty">Nenhum colaborador encontrado para esse filtro.</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(emp){
+      var le = lastEntry(emp.id, state.date);
+      var curStatus = le ? le.status : 'auditando';
+      var total = dailyTotalGaiolas(emp.id, state.date);
+      var badge = '<span class="badge" style="background:'+STATUS[curStatus].color+'">'+STATUS[curStatus].label+'</span>';
+      var lastInfo = le ? ('Última checagem '+le.time+' · '+total+' gaiolas hoje') : 'Sem checagens hoje';
+
+      html += '<div class="row-card" data-emp="'+emp.id+'">';
+      html += '  <div class="row-top">';
+      html += '    <div class="who">';
+      html += '      <div class="avatar">'+initials(emp.nome)+'</div>';
+      html += '      <div><div class="who-name">'+escapeHtml(emp.nome)+'</div><div class="who-meta">'+escapeHtml(emp.cargo||'—')+' · '+escapeHtml(emp.turno||'—')+(emp.escala?(' · Esc. '+escapeHtml(emp.escala)):'')+'</div></div>';
+      html += '    </div>';
+      html += '    <div style="display:flex;align-items:center;gap:10px;">'+badge+'<div class="last-check">'+lastInfo+'</div></div>';
+      html += '  </div>';
+
+      html += '  <div class="status-group" data-role="status-group">';
+      STATUS_ORDER.forEach(function(code){
+        html += '<button class="status-btn'+(code===curStatus?' sel':'')+'" data-status="'+code+'" style="'+(code===curStatus?('background:'+STATUS[code].color+';border-color:'+STATUS[code].color):'')+'">'+STATUS[code].label+'</button>';
+      });
+      html += '  </div>';
+
+      html += '  <div class="form-line">';
+      html += '    <div class="form-field"><label>Gaiolas auditadas (desde a última checagem)</label>';
+      html += '      <div class="stepper"><button data-step="-1">−</button><input type="number" min="0" value="0" data-role="gaiolas-input"><button data-step="1">+</button></div>';
+      html += '    </div>';
+      html += '    <div class="form-field justif" data-role="justif-wrap" style="display:'+(STATUS[curStatus].needsJust?'flex':'none')+'">';
+      html += '      <label>Justificativa</label><input type="text" data-role="justif-input" placeholder="Ex: almoço 12h-13h / líder pediu apoio no recebimento">';
+      html += '    </div>';
+      html += '    <button class="save-btn" data-role="save-btn">Registrar checagem</button>';
+      html += '  </div>';
+
+      var hist = entriesFor(emp.id, state.date);
+      html += '  <button class="history-toggle" data-role="hist-toggle">'+(openHistory[emp.id] ? 'Ocultar' : 'Ver')+' histórico de hoje ('+hist.length+')</button>';
+      html += '  <div class="history" data-role="history" style="display:'+(openHistory[emp.id]?'block':'none')+'">';
+      if(hist.length){
+        html += '<table><thead><tr><th>Hora</th><th>Status</th><th>Gaiolas</th><th>Justificativa</th><th></th></tr></thead><tbody>';
+        hist.forEach(function(e){
+          html += '<tr><td>'+e.time+'</td><td>'+STATUS[e.status].label+'</td><td>'+e.gaiolas+'</td><td>'+escapeHtml(e.justificativa||'—')+'</td>';
+          html += '<td><button class="del" data-role="del-entry" data-id="'+e.id+'">remover</button></td></tr>';
+        });
+        html += '</tbody></table>';
+      } else {
+        html += '<div style="font-size:12.5px;color:var(--muted);">Nenhum registro ainda.</div>';
+      }
+      html += '  </div>';
+
+      html += '</div>';
+    });
+    container.innerHTML = html;
+    wireEmpListEvents();
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function wireEmpListEvents(){
+    document.querySelectorAll('.row-card').forEach(function(card){
+      var empId = card.getAttribute('data-emp');
+      var selectedStatus = 'auditando';
+      var initialBtn = card.querySelector('.status-btn.sel');
+      if(initialBtn) selectedStatus = initialBtn.getAttribute('data-status');
+
+      var justifWrap = card.querySelector('[data-role="justif-wrap"]');
+      var gaiolasInput = card.querySelector('[data-role="gaiolas-input"]');
+
+      card.querySelectorAll('.status-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          selectedStatus = btn.getAttribute('data-status');
+          card.querySelectorAll('.status-btn').forEach(function(b){
+            b.classList.remove('sel'); b.style.background=''; b.style.borderColor='';
+          });
+          btn.classList.add('sel');
+          btn.style.background = STATUS[selectedStatus].color;
+          btn.style.borderColor = STATUS[selectedStatus].color;
+          justifWrap.style.display = STATUS[selectedStatus].needsJust ? 'flex' : 'none';
+        });
+      });
+
+      card.querySelectorAll('[data-step]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var step = Number(btn.getAttribute('data-step'));
+          var v = Number(gaiolasInput.value)||0;
+          v = Math.max(0, v+step);
+          gaiolasInput.value = v;
+        });
+      });
+
+      card.querySelector('[data-role="save-btn"]').addEventListener('click', function(){
+        var gaiolas = Number(gaiolasInput.value)||0;
+        var justifInput = card.querySelector('[data-role="justif-input"]');
+        var justificativa = justifInput ? justifInput.value.trim() : '';
+        log.push({
+          id: genId(),
+          employeeId: empId,
+          date: state.date,
+          time: nowHM(),
+          status: selectedStatus,
+          gaiolas: gaiolas,
+          justificativa: justificativa
+        });
+        save(LS_LOG, log);
+        renderEmpList();
+      });
+
+      var histToggle = card.querySelector('[data-role="hist-toggle"]');
+      histToggle.addEventListener('click', function(){
+        openHistory[empId] = !openHistory[empId];
+        renderEmpList();
+      });
+
+      card.querySelectorAll('[data-role="del-entry"]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id = btn.getAttribute('data-id');
+          log = log.filter(function(e){ return e.id !== id; });
+          save(LS_LOG, log);
+          renderEmpList();
+        });
+      });
+    });
+  }
+
+  // ---------- Colaboradores tab ----------
+  document.getElementById('btn-add-emp').addEventListener('click', function(){
+    var nome = document.getElementById('f-nome').value.trim();
+    if(!nome){ alert('Informe o nome do colaborador.'); return; }
+    employees.push({
+      id: genId(),
+      nome: nome,
+      matricula: document.getElementById('f-mat').value.trim(),
+      cargo: document.getElementById('f-cargo').value.trim(),
+      turno: document.getElementById('f-turno').value,
+      escala: document.getElementById('f-escala').value
+    });
+    save(LS_EMP, employees);
+    document.getElementById('f-nome').value='';
+    document.getElementById('f-mat').value='';
+    document.getElementById('f-cargo').value='';
+    renderEmpTable();
+    renderEmpList();
+  });
+
+  document.getElementById('btn-import').addEventListener('click', function(){
+    var raw = document.getElementById('paste-box').value;
+    if(!raw.trim()) return;
+    var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    var added = 0;
+    lines.forEach(function(line){
+      var cols = line.split('\t');
+      if(cols.length===1) cols = line.split(/\s{2,}/);
+      var nome = (cols[0]||'').trim();
+      if(!nome) return;
+      employees.push({
+        id: genId(),
+        nome: nome,
+        matricula: (cols[1]||'').trim(),
+        cargo: (cols[2]||'').trim(),
+        turno: (cols[3]||'AM').trim().toUpperCase(),
+        escala: (cols[4]||'').trim().toUpperCase()
+      });
+      added++;
+    });
+    save(LS_EMP, employees);
+    document.getElementById('paste-box').value='';
+    renderEmpTable();
+    renderEmpList();
+    alert(added+' colaborador(es) importado(s).');
+  });
+
+  function renderEmpTable(){
+    document.getElementById('emp-count').textContent = employees.length;
+    var body = document.getElementById('emp-table-body');
+    if(employees.length===0){
+      body.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">Nenhum colaborador cadastrado.</td></tr>';
+      return;
+    }
+    var html='';
+    employees.forEach(function(emp){
+      html += '<tr>';
+      html += '<td>'+escapeHtml(emp.nome)+'</td>';
+      html += '<td>'+escapeHtml(emp.matricula||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.cargo||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.turno||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.escala||'—')+'</td>';
+      html += '<td><button class="icon-btn danger" data-role="rm-emp" data-id="'+emp.id+'">remover</button></td>';
+      html += '</tr>';
+    });
+    body.innerHTML = html;
+    body.querySelectorAll('[data-role="rm-emp"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-id');
+        if(!confirm('Remover este colaborador? O histórico de auditorias dele será mantido.')) return;
+        employees = employees.filter(function(e){ return e.id !== id; });
+        save(LS_EMP, employees);
+        renderEmpTable();
+        renderEmpList();
+      });
+    });
+  }
+
+  // ---------- Relatórios tab ----------
+  document.querySelectorAll('#periodo-toggle button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#periodo-toggle button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.reportPeriod = btn.getAttribute('data-v');
+      renderReport();
+    });
+  });
+  reportDateInput.addEventListener('change', function(){
+    state.reportDate = reportDateInput.value || todayISO();
+    renderReport();
+  });
+
+  function periodRange(){
+    var d = new Date(state.reportDate+'T00:00:00');
+    if(state.reportPeriod==='dia'){
+      return [toISODate(d), toISODate(d)];
+    }
+    if(state.reportPeriod==='semana'){
+      var day = d.getDay(); // 0=Sun
+      var diffToMon = (day===0 ? -6 : 1-day);
+      var mon = new Date(d); mon.setDate(d.getDate()+diffToMon);
+      var sun = new Date(mon); sun.setDate(mon.getDate()+6);
+      return [toISODate(mon), toISODate(sun)];
+    }
+    // mes
+    var first = new Date(d.getFullYear(), d.getMonth(), 1);
+    var last = new Date(d.getFullYear(), d.getMonth()+1, 0);
+    return [toISODate(first), toISODate(last)];
+  }
+
+  function inRange(dateStr, range){ return dateStr >= range[0] && dateStr <= range[1]; }
+
+  var openDetail = {};
+
+  function renderReport(){
+    var range = periodRange();
+    document.getElementById('report-range').textContent = 'Período: '+formatBR(range[0])+' até '+formatBR(range[1]);
+
+    var byEmp = {};
+    employees.forEach(function(emp){ byEmp[emp.id] = {emp:emp, entries:[]}; });
+    log.forEach(function(e){
+      if(inRange(e.date, range)){
+        if(!byEmp[e.employeeId]) byEmp[e.employeeId] = {emp:{id:e.employeeId, nome:'(removido)', cargo:''}, entries:[]};
+        byEmp[e.employeeId].entries.push(e);
+      }
+    });
+
+    var rows = Object.keys(byEmp).map(function(id){ return byEmp[id]; })
+      .filter(function(r){ return r.entries.length>0; })
+      .sort(function(a,b){ return a.emp.nome.localeCompare(b.emp.nome); });
+
+    var body = document.getElementById('report-body');
+    var foot = document.getElementById('report-foot');
+
+    if(rows.length===0){
+      body.innerHTML = '<tr><td colspan="9" style="color:var(--muted);padding:16px;">Nenhuma checagem registrada nesse período.</td></tr>';
+      foot.innerHTML = '';
+      return;
+    }
+
+    var html='';
+    var totals = {checks:0, gaiolas:0, almoco:0, lider:0, ausente:0, outro:0};
+
+    rows.forEach(function(r){
+      var g=0, counts={almoco:0,lider:0,ausente:0,outro:0};
+      var lastJust = '';
+      r.entries.slice().sort(function(a,b){ return (a.date+a.time) < (b.date+b.time) ? -1 : 1; })
+        .forEach(function(e){
+          g += Number(e.gaiolas)||0;
+          if(counts[e.status]!==undefined) counts[e.status]++;
+          if(e.justificativa) lastJust = e.justificativa;
+        });
+      totals.checks += r.entries.length;
+      totals.gaiolas += g;
+      totals.almoco += counts.almoco;
+      totals.lider += counts.lider;
+      totals.ausente += counts.ausente;
+      totals.outro += counts.outro;
+
+      html += '<tr class="exp-row" data-role="exp" data-id="'+r.emp.id+'">';
+      html += '<td>'+escapeHtml(r.emp.nome)+'</td>';
+      html += '<td>'+escapeHtml(r.emp.cargo||'—')+'</td>';
+      html += '<td class="num">'+r.entries.length+'</td>';
+      html += '<td class="num">'+g+'</td>';
+      html += '<td class="num">'+counts.almoco+'</td>';
+      html += '<td class="num">'+counts.lider+'</td>';
+      html += '<td class="num">'+counts.ausente+'</td>';
+      html += '<td class="num">'+counts.outro+'</td>';
+      html += '<td>'+escapeHtml(lastJust||'—')+'</td>';
+      html += '</tr>';
+
+      if(openDetail[r.emp.id]){
+        html += '<tr class="detail-row"><td colspan="9"><div class="detail-inner"><table><thead><tr><th>Data</th><th>Hora</th><th>Status</th><th>Gaiolas</th><th>Justificativa</th></tr></thead><tbody>';
+        r.entries.slice().sort(function(a,b){ return (a.date+a.time) < (b.date+b.time) ? -1 : 1; }).forEach(function(e){
+          html += '<tr><td>'+formatBR(e.date)+'</td><td>'+e.time+'</td><td>'+STATUS[e.status].label+'</td><td>'+e.gaiolas+'</td><td>'+escapeHtml(e.justificativa||'—')+'</td></tr>';
+        });
+        html += '</tbody></table></div></td></tr>';
+      }
+    });
+    body.innerHTML = html;
+
+    foot.innerHTML = '<tr><td colspan="2">Totais</td>'+
+      '<td class="num">'+totals.checks+'</td>'+
+      '<td class="num">'+totals.gaiolas+'</td>'+
+      '<td class="num">'+totals.almoco+'</td>'+
+      '<td class="num">'+totals.lider+'</td>'+
+      '<td class="num">'+totals.ausente+'</td>'+
+      '<td class="num">'+totals.outro+'</td>'+
+      '<td></td></tr>';
+
+    body.querySelectorAll('[data-role="exp"]').forEach(function(tr){
+      tr.addEventListener('click', function(){
+        var id = tr.getAttribute('data-id');
+        openDetail[id] = !openDetail[id];
+        renderReport();
+      });
+    });
+  }
+
+  function formatBR(iso){
+    var p = iso.split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  }
+
+  document.getElementById('btn-print').addEventListener('click', function(){ window.print(); });
+
+  document.getElementById('btn-csv').addEventListener('click', function(){
+    var range = periodRange();
+    var rows = [['Colaborador','Cargo','Data','Hora','Status','Gaiolas','Justificativa']];
+    log.filter(function(e){ return inRange(e.date, range); })
+       .sort(function(a,b){ return (a.date+a.time) < (b.date+b.time) ? -1 : 1; })
+       .forEach(function(e){
+        var emp = employees.filter(function(x){ return x.id===e.employeeId; })[0];
+        rows.push([
+          emp ? emp.nome : '(removido)',
+          emp ? (emp.cargo||'') : '',
+          formatBR(e.date), e.time, STATUS[e.status].label, e.gaiolas, e.justificativa||''
+        ]);
+      });
+    var csv = rows.map(function(r){
+      return r.map(function(v){
+        var s = String(v).replace(/"/g,'""');
+        return /[",\n]/.test(s) ? '"'+s+'"' : s;
+      }).join(';');
+    }).join('\n');
+    var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'auditoria-carrinho_'+range[0]+'_a_'+range[1]+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+
+  // ---------- Init ----------
+  renderEmpList();
+  renderEmpTable();
+})();
+</script>
+</body>
+</html>
