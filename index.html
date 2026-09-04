@@ -68,7 +68,7 @@
   }
   .search input::placeholder{color:#8095B3;}
 
-  .stats-row{max-width:1180px;margin:14px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .stats-row{max-width:1180px;margin:14px auto 0;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
   .stat-card{
     background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;
     padding:10px 14px;
@@ -109,6 +109,34 @@
   .badge{
     font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;white-space:nowrap;
   }
+  .scale-badge.folga{background:#647085;}
+  .scale-badge.escalado{background:#1C7F6B;}
+  .row-card.is-folga{background:#F8F9FB;border-style:dashed;}
+
+  .collapsible-toggle{
+    background:none;border:none;padding:0;margin:0;font-size:15px;font-weight:700;color:var(--navy-800);
+    cursor:pointer;display:flex;align-items:center;gap:6px;
+  }
+  #toggle-emp-arrow{display:inline-block;transition:transform .15s;font-size:12px;color:var(--navy-500);}
+
+  .action-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .action-tab-btn{
+    background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:13px;font-weight:700;
+    color:var(--navy-800);
+  }
+  .action-tab-btn:hover{background:#E4E9F0;}
+  .action-tab-btn.active{background:var(--navy-800);border-color:var(--navy-800);color:#fff;}
+  .action-panel{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+  .scale-row{cursor:pointer;}
+  .scale-row:hover td{background:var(--paper);}
+  .scale-detail-row td{background:#F8FAFC;padding:0;}
+  .scale-detail-inner{padding:6px 16px;display:flex;flex-direction:column;max-height:340px;overflow-y:auto;}
+  .scale-detail-person{
+    font-size:12.5px;color:var(--ink);display:flex;gap:8px;align-items:center;
+    padding:6px 4px;border-bottom:1px solid var(--line);
+  }
+  .scale-detail-person:last-child{border-bottom:none;}
+  .scale-detail-person .sx{color:var(--muted);font-size:11px;}
   .last-check{font-size:12px;color:var(--muted);text-align:right;}
 
   .status-group{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
@@ -157,10 +185,24 @@
     width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12.5px;
     font-family:ui-monospace,Menlo,Consolas,monospace;
   }
-  table.emp-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;}
-  table.emp-table th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;padding:6px 8px;border-bottom:1px solid var(--line);}
-  table.emp-table td{padding:7px 8px;border-bottom:1px solid var(--line);}
+  table.emp-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px;}
+  table.emp-table th{
+    text-align:left;color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;
+    padding:6px 10px;height:auto;border-bottom:2px solid var(--navy-800);border-right:1px solid var(--line);white-space:nowrap;
+    background:var(--paper);position:sticky;top:0;
+  }
+  table.emp-table th:last-child{border-right:none;}
+  table.emp-table td{
+    padding:3px 10px;height:26px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);
+    white-space:nowrap;vertical-align:middle;line-height:1.1;
+  }
+  table.emp-table select.sexo-select{
+    font-size:12.5px;border:1px solid var(--line);border-radius:5px;padding:1px 4px;background:#fff;color:var(--ink);
+  }
+  table.emp-table td:last-child{border-right:none;}
   table.emp-table tr:hover td{background:var(--paper);}
+  table.emp-table tr:nth-child(even) td{background:#FBFCFD;}
+  table.emp-table tr:nth-child(even):hover td{background:var(--paper);}
   .icon-btn{background:none;border:none;color:var(--muted);font-size:13px;padding:2px 6px;}
   .icon-btn.danger{color:var(--ausente);}
 
@@ -189,6 +231,9 @@
   .detail-inner th{text-align:left;color:var(--muted);padding:3px 6px;}
   .detail-inner td{padding:3px 6px;border-top:1px solid var(--line);}
 
+  @media (max-width:960px){
+    .stats-row{grid-template-columns:repeat(3,1fr);}
+  }
   @media (max-width:720px){
     .stats-row{grid-template-columns:repeat(2,1fr);}
     .grid-form{grid-template-columns:1fr 1fr;}
@@ -220,9 +265,23 @@
           <button data-v="AM0">AM0</button>
         </div>
       </div>
+      <div class="field">
+        <label>Situação no dia</label>
+        <div class="segmented" id="situacao-filter">
+          <button data-v="TODOS" class="active">Todos</button>
+          <button data-v="ESCALADO">Escalados</button>
+          <button data-v="FOLGA">De folga</button>
+        </div>
+      </div>
       <div class="field search">
         <label>Buscar colaborador</label>
         <input type="text" id="search-box" placeholder="Nome ou matrícula...">
+      </div>
+      <div class="field">
+        <label style="visibility:hidden;">.</label>
+        <label style="display:flex;align-items:center;gap:6px;color:#B9C6DA;font-size:12px;font-weight:600;white-space:nowrap;">
+          <input type="checkbox" id="show-inativos"> Mostrar inativos
+        </label>
       </div>
     </div>
     <div class="stats-row" id="stats-row"></div>
@@ -236,39 +295,86 @@
 </div>
 
 <main>
-  <section id="tab-hoje"><div id="emp-list"></div></section>
+  <section id="tab-hoje">
+    <div class="panel">
+      <h3 style="text-transform:uppercase;letter-spacing:.5px;font-size:14px;">Escalas trabalhando nesta data — <span id="scale-summary-date"></span></h3>
+      <p class="hint">Clique numa escala pra ver os nomes de quem está escalado. Só aparecem aqui as escalas que estão trabalhando (não de folga) na data.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 4px;">
+        <div class="form-field" style="min-width:240px;">
+          <label>Escala</label>
+          <select id="scale-filter-escala"><option value="">Todas as escalas</option></select>
+        </div>
+        <div class="form-field" style="min-width:180px;">
+          <label>Horário / Turno</label>
+          <select id="scale-filter-horario"><option value="">Todos os horários</option></select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="report-table" id="scale-summary-table"></table>
+      </div>
+    </div>
+    <div id="emp-list"></div>
+  </section>
 
   <section id="tab-colab" hidden>
     <div class="panel">
-      <h3>Adicionar colaborador</h3>
-      <p class="hint">Cadastre manualmente ou importe colando várias linhas da planilha (Nome, Matrícula, Cargo, Turno, Escala — separados por tabulação).</p>
-      <div class="grid-form">
-        <div class="form-field"><label>Nome</label><input id="f-nome" type="text"></div>
-        <div class="form-field"><label>Matrícula</label><input id="f-mat" type="text"></div>
-        <div class="form-field"><label>Cargo</label><input id="f-cargo" type="text"></div>
-        <div class="form-field"><label>Turno</label>
-          <select id="f-turno"><option>AM</option><option>PM</option><option>SD</option><option>AM0</option></select>
+      <div class="action-tabs">
+        <button type="button" class="action-tab-btn active" data-action="add">+ Adicionar colaborador</button>
+        <button type="button" class="action-tab-btn" data-action="sexo">+ Preencher Sexo em lote</button>
+        <button type="button" class="action-tab-btn" data-action="import">+ Importar em lote</button>
+      </div>
+
+      <div id="action-panel-add" class="action-panel">
+        <p class="hint">Cadastre manualmente ou importe colando várias linhas da planilha (Nome, Matrícula, Cargo, Turno, Escala — separados por tabulação).</p>
+        <div class="grid-form">
+          <div class="form-field"><label>Nome</label><input id="f-nome" type="text"></div>
+          <div class="form-field"><label>Matrícula</label><input id="f-mat" type="text"></div>
+          <div class="form-field"><label>Cargo</label><input id="f-cargo" type="text"></div>
+          <div class="form-field"><label>Turno</label>
+            <select id="f-turno"><option>AM</option><option>PM</option><option>SD</option><option>AM0</option></select>
+          </div>
+          <div class="form-field"><label>Sexo</label>
+            <select id="f-sexo"><option value="">—</option><option value="M">Masculino</option><option value="F">Feminino</option></select>
+          </div>
+          <div class="form-field"><label>Escala</label>
+            <select id="f-escala"></select>
+          </div>
+          <button class="save-btn" id="btn-add-emp">Adicionar</button>
         </div>
-        <div class="form-field"><label>Escala</label>
-          <select id="f-escala"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+      </div>
+
+      <div id="action-panel-sexo" class="action-panel" hidden>
+        <p class="hint">Cole uma linha por colaborador, no formato "Nome completo M" ou "Nome completo F" (o M/F sempre no final da linha). O app casa pelo nome com quem já está cadastrado e preenche o Sexo — sem precisar reimportar a planilha inteira.</p>
+        <textarea class="paste" id="sexo-paste-box" placeholder="Ex: Adriano Pereira Pires M&#10;Agatha Fernanda Saluci da Cruz F"></textarea>
+        <div style="margin-top:8px;"><button class="save-btn" id="btn-import-sexo">Aplicar Sexo</button></div>
+      </div>
+
+      <div id="action-panel-import" class="action-panel" hidden>
+        <p class="hint">Cole as linhas <strong>incluindo a linha de título</strong> (cabeçalho) da planilha na primeira linha — o app identifica cada coluna pelo nome do título (ex: "Nome", "Escala", "Sexo", "Groot ID"...), então a ordem das colunas não importa. Se colar sem título, o app tenta adivinhar pelo formato de 16/17 colunas oficial.</p>
+        <textarea class="paste" id="paste-box" placeholder="Cole aqui, com a linha de título em cima, as linhas copiadas da planilha..."></textarea>
+        <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="save-btn" id="btn-import">Importar linhas</button>
+          <button class="btn-outline" id="btn-clear-all" style="color:var(--ausente);border-color:var(--ausente);">Apagar todos os colaboradores</button>
         </div>
-        <button class="save-btn" id="btn-add-emp">Adicionar</button>
       </div>
     </div>
 
     <div class="panel">
-      <h3>Importar em lote</h3>
-      <p class="hint">Cole as linhas no formato: Nome [TAB] Matrícula [TAB] Cargo [TAB] Turno [TAB] Escala</p>
-      <textarea class="paste" id="paste-box" placeholder="Ex: João Silva&#9;12345&#9;Conferente&#9;AM&#9;A"></textarea>
-      <div style="margin-top:8px;"><button class="save-btn" id="btn-import">Importar linhas</button></div>
-    </div>
-
-    <div class="panel">
-      <h3>Colaboradores cadastrados (<span id="emp-count">0</span>)</h3>
-      <table class="emp-table">
-        <thead><tr><th>Nome</th><th>Matrícula</th><th>Cargo</th><th>Turno</th><th>Escala</th><th></th></tr></thead>
-        <tbody id="emp-table-body"></tbody>
-      </table>
+      <button type="button" id="toggle-emp-table" class="collapsible-toggle">
+        <span id="toggle-emp-arrow">▸</span> Colaboradores cadastrados (<span id="emp-count">0</span>)
+      </button>
+      <div id="emp-table-wrap" style="display:none;margin-top:12px;">
+        <div class="form-field" style="max-width:360px;margin-bottom:10px;">
+          <label>Buscar por nome, horário ou escala</label>
+          <input type="text" id="emp-table-search" placeholder="Ex: João / 05:00 / SVC - B1...">
+        </div>
+        <div style="overflow-x:auto;">
+        <table class="emp-table">
+          <thead><tr><th>Status</th><th>Nome</th><th>Matrícula</th><th>Groot ID</th><th>Coordenador</th><th>Escala</th><th>Horário</th><th>Sexo</th><th>Pendência</th><th>Cargo</th><th>EXT</th><th>Situação na data</th><th></th></tr></thead>
+          <tbody id="emp-table-body"></tbody>
+        </table>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -315,6 +421,76 @@
   var LS_EMP = 'acx_employees';
   var LS_LOG = 'acx_log';
 
+  // ---------- Calendário oficial de escalas Set-Nov/2026 (mesma base do app Presença KN) ----------
+  var BUILTIN_FOLGAS_2026 = [
+    ["SVC - A","01, 02, 07, 13, 19, 20, 24, 25, 29, 30","05, 11, 17, 18, 22, 23",""],
+    ["SVC - B","03, 04, 08, 09, 14, 20, 26, 27","01, 02, 06, 07, 12, 18, 24, 25",""],
+    ["SVC - C","05, 06, 10, 11, 15, 16, 21, 27","03, 04, 08, 09, 13, 14, 19, 25",""],
+    ["SVC - D","06, 12, 13, 17, 18, 22, 23, 28","04, 10, 11, 15, 16, 20, 21",""],
+    ["SVC - B1 - 05H / 09H / 10H / 14H48","05, 06, 11, 14, 17, 22, 23, 27","03, 04, 09, 12, 15, 20, 21, 25, 31","01, 06, 09, 12, 17, 18, 22"],
+    ["SVC - B2 - 05H / 09H / 10H / 14H48","01, 02, 06, 12, 13, 18, 21, 24, 29, 30","04, 10, 11, 16, 19, 22, 27, 28","01, 07, 08, 13, 16, 19"],
+    ["SVC - B3 - 05H / 09H / 10H / 14H48","03, 08, 09, 13, 19, 20, 25, 28","01, 06, 07, 11, 17, 18, 23, 26, 29","03, 04, 08, 14, 15, 20"],
+    ["SVC - B4 - 05H / 09H / 10H / 14H48","04, 07, 10, 15, 16, 20, 26, 27","02, 05, 08, 13, 14, 18, 24, 25, 30","02, 05, 10, 11, 15, 21, 22"],
+    ["SVC - C1 - 05H / 09H / 10H / 14H48","05, 06, 11, 16, 17, 21, 22, 28","03, 04, 09, 14, 15, 19, 20, 26, 31","01, 06, 11, 12, 16, 17"],
+    ["SVC - C2 - 05H / 09H / 10H / 14H48","02, 03, 07, 08, 14, 19, 20, 25, 30","01, 05, 06, 12, 17, 18, 23, 28, 29","02, 03, 09, 14, 15, 20"],
+    ["SVC - C3 - 05H / 09H / 10H / 14H48","01, 07, 12, 13, 18, 23, 24, 28, 29","05, 10, 11, 16, 21, 22, 26, 27","02, 07, 08, 13, 18, 19"],
+    ["SVC - C4 - 05H / 09H / 10H / 14H48","04, 09, 10, 14, 15, 21, 26, 27","02, 07, 08, 12, 13, 19, 24, 25, 30","04, 05, 09, 10, 16, 21, 22"],
+    ["SVC - C1 - 06H / 10H / 11H / 15H48","02, 03, 07, 08, 14, 19, 20, 25, 30","01, 05, 06, 12, 17, 18, 23, 28, 29","02, 03, 09, 14, 15, 20"],
+    ["SVC - C2 - 06H / 10H / 11H / 15H48","05, 06, 11, 16, 17, 21, 22, 28","03, 04, 09, 14, 15, 19, 20, 26, 31","01, 06, 11, 12, 16, 17"],
+    ["SVC - C3 - 06H / 09H / 10H / 15H48","04, 09, 10, 14, 15, 21, 26, 27","02, 07, 08, 12, 13, 19, 24, 25, 30","04, 05, 09, 10, 16, 21, 22"],
+    ["SVC - C4 - 06H / 10H / 11H / 15H48","01, 07, 12, 13, 18, 23, 24, 28, 29","05, 10, 11, 16, 21, 22, 26, 27","02, 07, 08, 13, 18, 19"],
+    ["SVC - G1 - 08H / 12H / 13H / 17H48","06, 07, 13, 14, 20, 21, 27, 28","04, 05, 11, 12, 18, 19, 25, 26","01, 02, 08, 09, 15, 16, 22"],
+    ["SVC - G2 - 08H / 12H / 13H / 17H48","05, 06, 12, 13, 19, 20, 26, 27","03, 04, 10, 11, 17, 18, 24, 25, 31","01, 07, 08, 14, 15, 21, 22"],
+    ["SVC - G1 - 13H / 17H / 18H / 22H48","03, 06, 12, 13, 14, 20, 23, 27","01, 04, 10, 11, 12, 18, 21, 25, 29","01, 07, 08, 09, 15, 18, 22"],
+    ["SVC - G2 - 13H / 17H / 18H / 22H48","02, 06, 10, 13, 19, 20, 21, 27, 30","04, 08, 11, 17, 18, 19, 25, 28","01, 05, 08, 14, 15, 16, 22"],
+    ["SVC - G3 - 13H / 17H / 18H / 22H48","06, 09, 13, 17, 20, 26, 27, 28","04, 07, 11, 15, 18, 24, 25, 26","01, 04, 08, 12, 15, 21, 22"],
+    ["SVC - G4 - 13H / 17H / 18H / 22H48","05, 06, 07, 13, 16, 20, 24, 27","03, 04, 05, 11, 14, 18, 22, 25, 31","01, 02, 08, 11, 15, 19, 22"],
+    ["SVC - A1 - 14H / 18H / 19H / 23H48","01, 07, 08, 14, 15, 21, 22, 27, 28, 29","05, 06, 12, 13, 19, 20, 25, 26, 27","02, 03, 09, 10, 16, 17, 22"],
+    ["SVC - A2 - 14H / 18H / 19H / 23H48","01, 06, 07, 08, 14, 15, 21, 22, 28, 29","04, 05, 06, 12, 13, 19, 20, 26, 27","01, 02, 03, 09, 10, 16, 17"],
+    ["SVC - A3 - 14H / 18H / 19H / 23H48","01, 07, 08, 13, 14, 15, 21, 22, 28, 29","05, 06, 11, 12, 13, 19, 20, 26, 27","02, 03, 08, 09, 10, 16, 17"],
+    ["SVC - A4 - 14H / 18H / 19H / 23H48","01, 07, 08, 14, 15, 20, 21, 22, 28, 29","05, 06, 12, 13, 18, 19, 20, 26, 27","02, 03, 09, 10, 15, 16, 17"],
+    ["SVC - G1 - 23H / 03H / 04H / 08H48","01, 02, 08, 12, 13, 18, 21, 24, 29, 30","06, 10, 11, 16, 19, 22, 27, 28","03, 07, 08, 13, 16, 19"],
+    ["SVC - G2 - 23H / 03H / 04H / 08H48","04, 07, 10, 15, 16, 22, 26, 27","02, 05, 08, 13, 14, 20, 24, 25, 30","02, 05, 10, 11, 17, 21, 22"],
+    ["SVC - G3 - 23H / 03H / 04H / 08H48","03, 08, 09, 15, 19, 20, 25, 28","01, 06, 07, 13, 17, 18, 23, 26, 29","03, 04, 10, 14, 15, 20"],
+    ["SVC - G4 - 23H / 03H / 04H / 08H48","01, 05, 06, 11, 14, 17, 22, 23, 29","03, 04, 09, 12, 15, 20, 21, 27, 31","01, 06, 09, 12, 17, 18"]
+  ];
+  var ESCALAS_DISPONIVEIS = BUILTIN_FOLGAS_2026.map(function(r){ return r[0]; });
+
+  function normScale(v){
+    return String(v||'')
+      .replace(/\s+/g,' ')
+      .replace(/\s*-\s*/g,' - ')
+      .replace(/\s*\/\s*/g,' / ')
+      .trim()
+      .toUpperCase();
+  }
+  function parseDays(v){
+    return String(v||'').split(',').map(function(x){ return parseInt(x.trim(),10); })
+      .filter(function(n){ return !isNaN(n); });
+  }
+  // Retorna true se a escala informada está de folga na data (YYYY-MM-DD).
+  // A base oficial cobre Set/Out/Nov de 2026; fora desse período não há como
+  // determinar a folga automaticamente, então consideramos "escalado" (false).
+  function isScaleOff(scale, date){
+    var s = normScale(scale);
+    var p = String(date||'').split('-');
+    if(p.length!==3 || !s) return false;
+    var y=Number(p[0]), m=Number(p[1]), d=Number(p[2]);
+    if(y!==2026 || [9,10,11].indexOf(m)<0) return false;
+    var row = BUILTIN_FOLGAS_2026.find(function(r){ return normScale(r[0])===s; });
+    if(!row) return false;
+    var idx = m===9?1:(m===10?2:3);
+    return parseDays(row[idx]).indexOf(d)>=0;
+  }
+  // true = escala reconhecida na base oficial (cobre Set/Out/Nov 2026)
+  function scaleIsKnown(scale, date){
+    var p = String(date||'').split('-');
+    if(p.length!==3) return false;
+    var y=Number(p[0]), m=Number(p[1]);
+    if(y!==2026 || [9,10,11].indexOf(m)<0) return false;
+    return !!BUILTIN_FOLGAS_2026.find(function(r){ return normScale(r[0])===normScale(scale); });
+  }
+
   function load(key){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch(e){ return []; } }
   function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
@@ -344,18 +520,37 @@
   var state = {
     date: todayISO(),
     turno: 'TODOS',
+    situacao: 'TODOS',
     search: '',
+    empTableSearch: '',
+    showInativos: false,
     reportPeriod: 'dia',
     reportDate: todayISO()
   };
+
+  // Popula o select de Escala (form de cadastro) com as 30 escalas oficiais
+  (function populaEscalaSelect(){
+    var sel = document.getElementById('f-escala');
+    if(!sel) return;
+    var basicas = ESCALAS_DISPONIVEIS.filter(function(s){ return /^SVC - [A-D]$/.test(s); });
+    var detalhadas = ESCALAS_DISPONIVEIS.filter(function(s){ return !/^SVC - [A-D]$/.test(s); });
+    var html = '';
+    html += '<optgroup label="Escalas base (A/B/C/D)">';
+    basicas.forEach(function(s){ html += '<option value="'+s+'">'+s+'</option>'; });
+    html += '</optgroup><optgroup label="Escalas por turno/horário">';
+    detalhadas.forEach(function(s){ html += '<option value="'+s+'">'+s+'</option>'; });
+    html += '</optgroup>';
+    sel.innerHTML = html;
+  })();
 
   var dateInput = document.getElementById('audit-date');
   dateInput.value = state.date;
   var reportDateInput = document.getElementById('report-date');
   reportDateInput.value = state.reportDate;
 
-  dateInput.addEventListener('change', function(){ state.date = dateInput.value || todayISO(); renderEmpList(); });
+  dateInput.addEventListener('change', function(){ state.date = dateInput.value || todayISO(); renderEmpList(); renderEmpTable(); });
   document.getElementById('search-box').addEventListener('input', function(e){ state.search = e.target.value.toLowerCase(); renderEmpList(); });
+  document.getElementById('show-inativos').addEventListener('change', function(e){ state.showInativos = e.target.checked; renderEmpList(); });
 
   document.querySelectorAll('#turno-filter button').forEach(function(btn){
     btn.addEventListener('click', function(){
@@ -365,6 +560,18 @@
       renderEmpList();
     });
   });
+
+  document.querySelectorAll('#situacao-filter button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#situacao-filter button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.situacao = btn.getAttribute('data-v');
+      renderEmpList();
+    });
+  });
+
+  document.getElementById('scale-filter-escala').addEventListener('change', renderScaleSummary);
+  document.getElementById('scale-filter-horario').addEventListener('change', renderScaleSummary);
 
   document.querySelectorAll('.tab-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
@@ -377,6 +584,33 @@
       if(tab==='colab') renderEmpTable();
       if(tab==='rel') renderReport();
     });
+  });
+
+  document.querySelectorAll('.action-tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var action = btn.getAttribute('data-action');
+      var panel = document.getElementById('action-panel-'+action);
+      var isOpen = !panel.hidden;
+      document.querySelectorAll('.action-panel').forEach(function(p){ p.hidden = true; });
+      document.querySelectorAll('.action-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      if(!isOpen){
+        panel.hidden = false;
+        btn.classList.add('active');
+      }
+    });
+  });
+
+  var empTableWrap = document.getElementById('emp-table-wrap');
+  var empTableArrow = document.getElementById('toggle-emp-arrow');
+  document.getElementById('toggle-emp-table').addEventListener('click', function(){
+    var open = empTableWrap.style.display !== 'none';
+    empTableWrap.style.display = open ? 'none' : 'block';
+    empTableArrow.textContent = open ? '▸' : '▾';
+    if(!open) renderEmpTable();
+  });
+  document.getElementById('emp-table-search').addEventListener('input', function(e){
+    state.empTableSearch = e.target.value.toLowerCase();
+    renderEmpTable();
   });
 
   // ---------- Log helpers ----------
@@ -396,18 +630,21 @@
   function renderStats(){
     var list = filteredEmployees();
     var total = list.length;
-    var auditando=0, pausa=0, gaiolas=0;
+    var auditando=0, pausa=0, gaiolas=0, folga=0, escalado=0;
     list.forEach(function(emp){
       var le = lastEntry(emp.id, state.date);
       var st = le ? le.status : 'auditando';
       if(st==='auditando') auditando++; else pausa++;
       gaiolas += dailyTotalGaiolas(emp.id, state.date);
+      if(isScaleOff(emp.escala, state.date)) folga++; else escalado++;
     });
     var html = '';
     html += statCard(total, 'Colaboradores no filtro');
+    html += statCard(escalado, 'Escalados para trabalhar');
+    html += statCard(folga, 'De folga na data');
     html += statCard(auditando, 'Em auditoria agora');
     html += statCard(pausa, 'Em pausa / outra atividade');
-    html += statCard(gaiolas, 'Gaiolas auditadas hoje');
+    html += statCard(gaiolas, 'Gaiolas auditadas na data');
     document.getElementById('stats-row').innerHTML = html;
   }
   function statCard(n,l){
@@ -415,9 +652,19 @@
   }
 
   // ---------- Employees filter ----------
+  function isInativo(emp){
+    return String(emp.status||'').trim().toUpperCase() === 'INATIVO';
+  }
+
   function filteredEmployees(){
     return employees.filter(function(emp){
+      if(!state.showInativos && isInativo(emp)) return false;
       if(state.turno !== 'TODOS' && emp.turno !== state.turno) return false;
+      if(state.situacao !== 'TODOS'){
+        var off = isScaleOff(emp.escala, state.date);
+        if(state.situacao==='FOLGA' && !off) return false;
+        if(state.situacao==='ESCALADO' && off) return false;
+      }
       if(state.search){
         var hay = (emp.nome+' '+emp.matricula).toLowerCase();
         if(hay.indexOf(state.search) === -1) return false;
@@ -428,8 +675,100 @@
 
   // ---------- Render employee list (Auditoria de Hoje) ----------
   var openHistory = {};
+  var openScaleDetail = {};
+
+  function renderScaleSummary(){
+    var dateSpan = document.getElementById('scale-summary-date');
+    if(dateSpan){
+      var p = state.date.split('-');
+      dateSpan.textContent = p.length===3 ? (p[2]+'/'+p[1]+'/'+p[0]) : state.date;
+    }
+    var groups = {};
+    employees.forEach(function(emp){
+      if(!emp.escala) return;
+      if(!state.showInativos && isInativo(emp)) return;
+      var k = normScale(emp.escala);
+      if(!groups[k]) groups[k] = {label: emp.escala, horario:'', total:0, homens:0, mulheres:0, folga:0, escalados:0, working:[]};
+      var g = groups[k];
+      if(!g.horario && emp.horario) g.horario = emp.horario;
+      g.total++;
+      if(isScaleOff(emp.escala, state.date)){
+        g.folga++;
+      } else {
+        g.escalados++;
+        g.working.push(emp);
+        if(emp.sexo==='M') g.homens++;
+        else if(emp.sexo==='F') g.mulheres++;
+      }
+    });
+
+    // Popula os filtros (Escala / Horário) mantendo a seleção atual do usuário
+    var escalaSel = document.getElementById('scale-filter-escala');
+    var horarioSel = document.getElementById('scale-filter-horario');
+    if(escalaSel){
+      var curEscala = escalaSel.value;
+      var escalaOptions = Object.keys(groups).map(function(k){ return groups[k]; })
+        .sort(function(a,b){ return a.label.localeCompare(b.label,'pt-BR'); });
+      var htmlOpt = '<option value="">Todas as escalas</option>';
+      escalaOptions.forEach(function(g){ htmlOpt += '<option value="'+escapeHtml(normScale(g.label))+'">'+escapeHtml(g.label)+'</option>'; });
+      escalaSel.innerHTML = htmlOpt;
+      escalaSel.value = curEscala;
+    }
+    if(horarioSel){
+      var curHorario = horarioSel.value;
+      var horarios = [];
+      Object.keys(groups).forEach(function(k){ var h=groups[k].horario; if(h && horarios.indexOf(h)===-1) horarios.push(h); });
+      horarios.sort();
+      var htmlH = '<option value="">Todos os horários</option>';
+      horarios.forEach(function(h){ htmlH += '<option value="'+escapeHtml(h)+'">'+escapeHtml(h)+'</option>'; });
+      horarioSel.innerHTML = htmlH;
+      horarioSel.value = curHorario;
+    }
+
+    var filterEscala = escalaSel ? escalaSel.value : '';
+    var filterHorario = horarioSel ? horarioSel.value : '';
+
+    var rows = Object.keys(groups).map(function(k){ return {key:k, g:groups[k]}; })
+      .filter(function(item){ return item.g.escalados > 0; }) // só escalas trabalhando na data
+      .filter(function(item){ return !filterEscala || item.key===filterEscala; })
+      .filter(function(item){ return !filterHorario || item.g.horario===filterHorario; })
+      .sort(function(a,b){ return a.g.label.localeCompare(b.g.label,'pt-BR'); });
+
+    var table = document.getElementById('scale-summary-table');
+    if(!table) return;
+    if(rows.length===0){
+      table.innerHTML = '<tr><td style="color:var(--muted);padding:10px;">Nenhuma escala trabalhando encontrada para esse filtro/data.</td></tr>';
+      return;
+    }
+    var html = '<thead><tr><th></th><th>Escala</th><th class="num">Homens</th><th class="num">Mulheres</th><th class="num">Total</th></tr></thead><tbody>';
+    var totH=0, totM=0, totGeral=0;
+    rows.forEach(function(item){
+      var k=item.key, g=item.g;
+      totH+=g.homens; totM+=g.mulheres; totGeral+=g.escalados;
+      var isOpen = !!openScaleDetail[k];
+      html += '<tr class="scale-row" data-scale-key="'+escapeHtml(k)+'"><td>'+(isOpen?'▾':'▸')+'</td><td>'+escapeHtml(g.label)+'</td>'+
+        '<td class="num">'+g.homens+'</td><td class="num">'+g.mulheres+'</td><td class="num">'+g.escalados+'</td></tr>';
+      html += '<tr class="scale-detail-row" data-scale-detail="'+escapeHtml(k)+'" style="display:'+(isOpen?'table-row':'none')+';"><td colspan="5" class="scale-detail-cell">';
+      html += '<div class="scale-detail-inner">';
+      g.working.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); }).forEach(function(emp){
+        var sx = emp.sexo==='M' ? 'Homem' : (emp.sexo==='F' ? 'Mulher' : '');
+        html += '<span class="scale-detail-person">'+escapeHtml(emp.nome)+(sx?(' <span class="sx">('+sx+')</span>'):'')+'</span>';
+      });
+      html += '</div></td></tr>';
+    });
+    html += '</tbody><tfoot><tr><td></td><td>Totais</td><td class="num">'+totH+'</td><td class="num">'+totM+'</td><td class="num">'+totGeral+'</td></tr></tfoot>';
+    table.innerHTML = html;
+    table.querySelectorAll('.scale-row').forEach(function(tr){
+      tr.addEventListener('click', function(){
+        var k = tr.getAttribute('data-scale-key');
+        openScaleDetail[k] = !openScaleDetail[k];
+        renderScaleSummary();
+      });
+    });
+  }
 
   function renderEmpList(){
+    renderScaleSummary();
     renderStats();
     var list = filteredEmployees();
     var container = document.getElementById('emp-list');
@@ -449,13 +788,18 @@
       var badge = '<span class="badge" style="background:'+STATUS[curStatus].color+'">'+STATUS[curStatus].label+'</span>';
       var lastInfo = le ? ('Última checagem '+le.time+' · '+total+' gaiolas hoje') : 'Sem checagens hoje';
 
-      html += '<div class="row-card" data-emp="'+emp.id+'">';
+      var emOff = isScaleOff(emp.escala, state.date);
+      var scaleBadge = emOff
+        ? '<span class="badge scale-badge folga">Folga na escala</span>'
+        : '<span class="badge scale-badge escalado">Escalado p/ trabalhar</span>';
+
+      html += '<div class="row-card'+(emOff?' is-folga':'')+'" data-emp="'+emp.id+'">';
       html += '  <div class="row-top">';
       html += '    <div class="who">';
       html += '      <div class="avatar">'+initials(emp.nome)+'</div>';
       html += '      <div><div class="who-name">'+escapeHtml(emp.nome)+'</div><div class="who-meta">'+escapeHtml(emp.cargo||'—')+' · '+escapeHtml(emp.turno||'—')+(emp.escala?(' · Esc. '+escapeHtml(emp.escala)):'')+'</div></div>';
       html += '    </div>';
-      html += '    <div style="display:flex;align-items:center;gap:10px;">'+badge+'<div class="last-check">'+lastInfo+'</div></div>';
+      html += '    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">'+scaleBadge+badge+'<div class="last-check">'+lastInfo+'</div></div>';
       html += '  </div>';
 
       html += '  <div class="status-group" data-role="status-group">';
@@ -577,6 +921,7 @@
       matricula: document.getElementById('f-mat').value.trim(),
       cargo: document.getElementById('f-cargo').value.trim(),
       turno: document.getElementById('f-turno').value,
+      sexo: document.getElementById('f-sexo').value,
       escala: document.getElementById('f-escala').value
     });
     save(LS_EMP, employees);
@@ -587,48 +932,269 @@
     renderEmpList();
   });
 
+  function normSexo(v){
+    var s = String(v||'').trim().toUpperCase();
+    if(s==='M'||s==='MASCULINO') return 'M';
+    if(s==='F'||s==='FEMININO') return 'F';
+    return '';
+  }
+
+  // Tenta reconhecer uma linha de título/cabeçalho e mapear cada coluna pelo NOME dela,
+  // em vez de depender da posição. Retorna um objeto {campo: indiceDaColuna} ou null se
+  // a linha não parecer um cabeçalho reconhecível.
+  function detectHeaderMap(cols){
+    var map = {};
+    cols.forEach(function(h, i){
+      var k = String(h||'').trim().toLowerCase();
+      if(!k) return;
+      if(/status|situa[cç][aã]o/.test(k) && map.status===undefined) map.status = i;
+      else if(/groot/.test(k)) map.grootId = i;
+      else if(/^nome\b/.test(k) && map.nome===undefined) map.nome = i;
+      else if(/matr[ií]cula/.test(k)) map.matricula = i;
+      else if(/coordenador/.test(k)) map.coordenador = i;
+      else if(/escala/.test(k) && /(antig|c[oó]d)/.test(k)) map.escalaAntiga = i;
+      else if(/escala/.test(k) && map.escala===undefined) map.escala = i;
+      else if(/pend[eê]ncia/.test(k)) map.pendencia = i;
+      else if(/hor[aá]rio/.test(k)) map.horario = i;
+      else if(/telefone|fone|celular/.test(k)) map.telefone = i;
+      else if(/^sexo\b/.test(k)) map.sexo = i;
+      else if(/cargo/.test(k)) map.cargo = i;
+      else if(/origem|setor/.test(k)) map.origem = i;
+      else if(/^tipo\b/.test(k)) map.tipo = i;
+      else if(/contratad/.test(k)) map.contratado = i;
+      else if(/cpf/.test(k)) map.cpf = i;
+      else if(/^(ext|login)\b/.test(k)) map.ext = i;
+    });
+    // Só consideramos que é mesmo um cabeçalho se pelo menos Nome e Escala foram reconhecidos
+    if(map.nome===undefined || map.escala===undefined) return null;
+    return map;
+  }
+
+  function normNome(v){
+    return String(v||'')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // remove acentos
+      .toLowerCase()
+      .replace(/\./g,'')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  document.getElementById('btn-import-sexo').addEventListener('click', function(){
+    var raw = document.getElementById('sexo-paste-box').value;
+    if(!raw.trim()) return;
+    var lines = raw.split('\n').map(function(l){ return l.replace(/\r$/,'').trim(); }).filter(Boolean);
+
+    var byName = {};
+    employees.forEach(function(e){
+      var k = normNome(e.nome);
+      if(!byName[k]) byName[k] = [];
+      byName[k].push(e);
+    });
+
+    var applied = 0, notFound = [];
+    lines.forEach(function(line){
+      var m = line.match(/^(.*\S)\s+([MF])$/i);
+      if(!m) { notFound.push(line+' (linha fora do formato "Nome M/F")'); return; }
+      var nome = m[1];
+      var sexo = m[2].toUpperCase();
+      var k = normNome(nome);
+      var matches = byName[k];
+      if(!matches || !matches.length){ notFound.push(nome); return; }
+      matches.forEach(function(emp){ emp.sexo = sexo; });
+      applied += matches.length;
+    });
+
+    save(LS_EMP, employees);
+    document.getElementById('sexo-paste-box').value = '';
+    renderEmpTable();
+    renderEmpList();
+
+    var msg = applied+' colaborador(es) atualizado(s) com o Sexo.';
+    if(notFound.length){
+      msg += '\n\n'+notFound.length+' nome(s) não encontrado(s) no cadastro (confira grafia/acentos):\n'+notFound.slice(0,25).join('\n');
+      if(notFound.length>25) msg += '\n... e mais '+(notFound.length-25)+'.';
+    }
+    alert(msg);
+  });
+
+  document.getElementById('btn-clear-all').addEventListener('click', function(){
+    if(employees.length===0) return;
+    if(!confirm('Apagar TODOS os '+employees.length+' colaboradores cadastrados? Essa ação não pode ser desfeita (o histórico de auditoria dos dias já registrados é mantido, mas os nomes somem da lista).')) return;
+    if(!confirm('Tem certeza mesmo? Isso vai limpar a lista inteira de colaboradores.')) return;
+    employees = [];
+    save(LS_EMP, employees);
+    renderEmpTable();
+    renderEmpList();
+  });
+
   document.getElementById('btn-import').addEventListener('click', function(){
     var raw = document.getElementById('paste-box').value;
     if(!raw.trim()) return;
-    var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
-    var added = 0;
-    lines.forEach(function(line){
+    var lines = raw.split('\n').map(function(l){ return l.replace(/\r$/,''); }).filter(function(l){ return l.trim(); });
+    var added = 0, updated = 0;
+    var byGroot = {};
+    employees.forEach(function(e){ if(e.grootId) byGroot[e.grootId] = e; });
+
+    // 1) Tenta detectar linha de título na primeira linha
+    var headerMap = null;
+    if(lines.length){
+      var firstCols = lines[0].split('\t');
+      if(firstCols.length>1) headerMap = detectHeaderMap(firstCols);
+    }
+    var dataLines = headerMap ? lines.slice(1) : lines;
+
+    function get(cols, map, field){
+      var i = map[field];
+      return (i===undefined || i===null) ? '' : (cols[i]||'').trim();
+    }
+
+    dataLines.forEach(function(line){
       var cols = line.split('\t');
-      if(cols.length===1) cols = line.split(/\s{2,}/);
-      var nome = (cols[0]||'').trim();
-      if(!nome) return;
-      employees.push({
-        id: genId(),
-        nome: nome,
-        matricula: (cols[1]||'').trim(),
-        cargo: (cols[2]||'').trim(),
-        turno: (cols[3]||'AM').trim().toUpperCase(),
-        escala: (cols[4]||'').trim().toUpperCase()
-      });
-      added++;
+
+      if(headerMap){
+        // 2a) Usa o mapeamento pelo título — não depende da ordem/posição das colunas
+        var nome = get(cols, headerMap, 'nome');
+        if(!nome) return;
+        var grootId = get(cols, headerMap, 'grootId');
+        var data = {
+          status: get(cols, headerMap, 'status'),
+          grootId: grootId,
+          nome: nome,
+          matricula: get(cols, headerMap, 'matricula'),
+          coordenador: get(cols, headerMap, 'coordenador'),
+          escala: get(cols, headerMap, 'escala'),
+          pendencia: get(cols, headerMap, 'pendencia'),
+          escalaAntiga: get(cols, headerMap, 'escalaAntiga'),
+          horario: get(cols, headerMap, 'horario'),
+          telefone: get(cols, headerMap, 'telefone'),
+          sexo: normSexo(get(cols, headerMap, 'sexo')),
+          cargo: get(cols, headerMap, 'cargo'),
+          origem: get(cols, headerMap, 'origem'),
+          tipo: get(cols, headerMap, 'tipo'),
+          contratado: get(cols, headerMap, 'contratado'),
+          cpf: get(cols, headerMap, 'cpf'),
+          ext: get(cols, headerMap, 'ext')
+        };
+        var existingH = grootId ? byGroot[grootId] : null;
+        if(existingH){
+          Object.keys(data).forEach(function(k){ existingH[k] = data[k]; });
+          updated++;
+        } else {
+          data.id = genId();
+          employees.push(data);
+          if(grootId) byGroot[grootId] = data;
+          added++;
+        }
+      } else if(cols.length >= 16){
+        // 2b) Sem título: assume o formato oficial (16 ou 17 colunas, com/sem Status no início)
+        var hasStatus = cols.length >= 17;
+        var off = hasStatus ? 1 : 0;
+        var status = hasStatus ? (cols[0]||'').trim() : '';
+        var grootId2 = (cols[0+off]||'').trim();
+        var nome2 = (cols[1+off]||'').trim();
+        if(!nome2) return;
+        var data2 = {
+          status: status,
+          grootId: grootId2,
+          nome: nome2,
+          matricula: (cols[2+off]||'').trim(),
+          coordenador: (cols[3+off]||'').trim(),
+          escala: (cols[4+off]||'').trim(),
+          pendencia: (cols[5+off]||'').trim(),
+          escalaAntiga: (cols[6+off]||'').trim(),
+          horario: (cols[7+off]||'').trim(),
+          telefone: (cols[8+off]||'').trim(),
+          sexo: normSexo(cols[9+off]),
+          cargo: (cols[10+off]||'').trim(),
+          origem: (cols[11+off]||'').trim(),
+          tipo: (cols[12+off]||'').trim(),
+          contratado: (cols[13+off]||'').trim(),
+          cpf: (cols[14+off]||'').trim(),
+          ext: (cols[15+off]||'').trim()
+        };
+        var existing2 = grootId2 ? byGroot[grootId2] : null;
+        if(existing2){
+          Object.keys(data2).forEach(function(k){ existing2[k] = data2[k]; });
+          updated++;
+        } else {
+          data2.id = genId();
+          employees.push(data2);
+          if(grootId2) byGroot[grootId2] = data2;
+          added++;
+        }
+      } else {
+        // 2c) Formato simples: Nome [TAB] Matrícula [TAB] Cargo [TAB] Turno [TAB] Escala
+        if(cols.length===1) cols = line.split(/\s{2,}/);
+        var nomeS = (cols[0]||'').trim();
+        if(!nomeS) return;
+        employees.push({
+          id: genId(),
+          nome: nomeS,
+          matricula: (cols[1]||'').trim(),
+          cargo: (cols[2]||'').trim(),
+          turno: (cols[3]||'AM').trim().toUpperCase(),
+          escala: (cols[4]||'').trim().toUpperCase()
+        });
+        added++;
+      }
     });
     save(LS_EMP, employees);
     document.getElementById('paste-box').value='';
     renderEmpTable();
     renderEmpList();
-    alert(added+' colaborador(es) importado(s).');
+    alert((headerMap ? 'Título reconhecido. ' : 'Título não encontrado, usei o formato posicional. ')+
+      added+' colaborador(es) novo(s) importado(s)'+(updated?(' · '+updated+' atualizado(s)'):'')+'.');
   });
+
+  var PENDENCIA_LABEL = {
+    'DESLIG': 'Será desligado',
+    'T3': 'Vai para T3 (madrugada)'
+  };
+  function pendenciaLabel(v){
+    var k = String(v||'').trim().toUpperCase();
+    return PENDENCIA_LABEL[k] || (k ? k : '—');
+  }
 
   function renderEmpTable(){
     document.getElementById('emp-count').textContent = employees.length;
     var body = document.getElementById('emp-table-body');
     if(employees.length===0){
-      body.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">Nenhum colaborador cadastrado.</td></tr>';
+      body.innerHTML = '<tr><td colspan="13" style="color:var(--muted);">Nenhum colaborador cadastrado.</td></tr>';
+      return;
+    }
+    var q = state.empTableSearch || '';
+    var list = employees.filter(function(emp){
+      if(!q) return true;
+      var hay = ((emp.nome||'')+' '+(emp.horario||'')+' '+(emp.escala||'')+' '+(emp.matricula||'')).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    if(list.length===0){
+      body.innerHTML = '<tr><td colspan="13" style="color:var(--muted);">Nenhum colaborador encontrado para essa busca.</td></tr>';
       return;
     }
     var html='';
-    employees.forEach(function(emp){
+    list.forEach(function(emp){
+      var off = isScaleOff(emp.escala, state.date);
+      var known = scaleIsKnown(emp.escala, state.date);
+      var situacaoTxt = !emp.escala ? '—' : (!known ? 'Fora da base (Set–Nov/26)' : (off ? 'Folga' : 'Escalado'));
+      var sexoSel = '<select class="sexo-select" data-role="edit-sexo" data-id="'+emp.id+'">'+
+        '<option value=""'+(!emp.sexo?' selected':'')+'>—</option>'+
+        '<option value="M"'+(emp.sexo==='M'?' selected':'')+'>M</option>'+
+        '<option value="F"'+(emp.sexo==='F'?' selected':'')+'>F</option>'+
+        '</select>';
       html += '<tr>';
+      html += '<td>'+escapeHtml(emp.status||'—')+'</td>';
       html += '<td>'+escapeHtml(emp.nome)+'</td>';
       html += '<td>'+escapeHtml(emp.matricula||'—')+'</td>';
-      html += '<td>'+escapeHtml(emp.cargo||'—')+'</td>';
-      html += '<td>'+escapeHtml(emp.turno||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.grootId||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.coordenador||'—')+'</td>';
       html += '<td>'+escapeHtml(emp.escala||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.horario||'—')+'</td>';
+      html += '<td>'+sexoSel+'</td>';
+      html += '<td>'+escapeHtml(pendenciaLabel(emp.pendencia))+'</td>';
+      html += '<td>'+escapeHtml(emp.cargo||'—')+'</td>';
+      html += '<td>'+escapeHtml(emp.ext||'—')+'</td>';
+      html += '<td>'+escapeHtml(situacaoTxt)+'</td>';
       html += '<td><button class="icon-btn danger" data-role="rm-emp" data-id="'+emp.id+'">remover</button></td>';
       html += '</tr>';
     });
@@ -641,6 +1207,16 @@
         save(LS_EMP, employees);
         renderEmpTable();
         renderEmpList();
+      });
+    });
+    body.querySelectorAll('[data-role="edit-sexo"]').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var id = sel.getAttribute('data-id');
+        var emp = employees.filter(function(e){ return e.id===id; })[0];
+        if(!emp) return;
+        emp.sexo = sel.value;
+        save(LS_EMP, employees);
+        renderEmpList(); // atualiza contagens de homens/mulheres por escala
       });
     });
   }
