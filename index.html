@@ -940,6 +940,17 @@
       <button class="btn-outline" id="btn-csv">Exportar CSV</button>
       <button class="btn-outline" id="btn-print">Imprimir</button>
     </div>
+    <div class="report-toolbar" style="margin-top:-6px;">
+      <button class="save-btn" id="btn-save-month" type="button">💾 Salvar relatório do mês</button>
+      <div class="field" style="min-width:240px;">
+        <label>Relatórios salvos (consulta)</label>
+        <select id="saved-reports-select">
+          <option value="">— Relatório atual (ao vivo) —</option>
+        </select>
+      </div>
+      <button class="btn-outline" id="btn-delete-saved" type="button" style="display:none;color:var(--ausente);border-color:var(--ausente);">Excluir relatório salvo</button>
+    </div>
+    <div id="saved-report-info" style="font-size:12px;color:var(--muted);margin:-6px 0 8px;"></div>
     <div id="report-range" style="font-size:13px;color:var(--muted);margin-bottom:8px;"></div>
     <div style="overflow-x:auto;">
       <table class="report-table" id="report-table">
@@ -970,6 +981,10 @@
   var LS_EMP = 'acx_employees';
   var LS_LOG = 'acx_log';
   var LS_DATA_VERSION = 'acx_data_version';
+  // Arquivo de relatórios mensais salvos ("banco de dados" de consulta): um snapshot
+  // por mês (chave "AAAA-MM"), guardado separado do log bruto de checagens, pra poder
+  // consultar meses fechados depois mesmo que o log mude.
+  var LS_REPORTS_ARCHIVE = 'acx_reports_archive';
   // Sempre que uma nova listagem oficial de colaboradores for carregada neste arquivo,
   // este identificador muda — isso faz o app zerar o cadastro antigo (desatualizado) e
   // subir a lista nova automaticamente na primeira vez que a página for aberta, sem
@@ -1135,7 +1150,8 @@
     reportPeriod: 'dia',
     reportDate: todayISO(),
     selectedEscalas: [],   // vazio = todas as escalas; senão, lista de escalas (normalizadas) marcadas
-    selectedHorarios: []   // vazio = todos os horários; senão, lista de horários marcados
+    selectedHorarios: [],  // vazio = todos os horários; senão, lista de horários marcados
+    viewingSavedKey: null  // quando preenchido ("AAAA-MM"), a aba Relatórios mostra um snapshot salvo em vez do relatório ao vivo
   };
 
   // Popula o select de Escala (form de cadastro) com as 30 escalas oficiais
@@ -1238,7 +1254,17 @@
         document.getElementById('tab-'+t).hidden = (t !== tab);
       });
       if(tab==='colab') renderEmpTable();
-      if(tab==='rel') renderReport();
+      if(tab==='rel'){
+        state.viewingSavedKey = null;
+        var savedSel = document.getElementById('saved-reports-select');
+        if(savedSel) savedSel.value = '';
+        var delBtn = document.getElementById('btn-delete-saved');
+        if(delBtn) delBtn.style.display = 'none';
+        document.getElementById('saved-report-info').textContent = '';
+        renderSavedReportsSelect();
+        setReportToolbarEnabled(true);
+        renderReport();
+      }
     });
   });
 
@@ -2215,6 +2241,210 @@
     renderReport();
   });
 
+  // ---------- Relatórios mensais salvos (banco de dados de consulta) ----------
+  function loadArchive(){
+    try{
+      var v = JSON.parse(localStorage.getItem(LS_REPORTS_ARCHIVE));
+      return (v && typeof v==='object') ? v : {};
+    }catch(e){ return {}; }
+  }
+  function saveArchiveObj(obj){ localStorage.setItem(LS_REPORTS_ARCHIVE, JSON.stringify(obj)); }
+  function monthKeyFromISO(iso){ return iso.slice(0,7); } // "AAAA-MM-DD" -> "AAAA-MM"
+  function monthRangeFromISO(iso){
+    var d = new Date(iso+'T00:00:00');
+    var first = new Date(d.getFullYear(), d.getMonth(), 1);
+    var last = new Date(d.getFullYear(), d.getMonth()+1, 0);
+    return [toISODate(first), toISODate(last)];
+  }
+  var MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  function monthLabel(key){
+    var p = key.split('-');
+    var idx = Number(p[1]) - 1;
+    return (MESES_PT[idx] || p[1]) + '/' + p[0];
+  }
+
+  // Monta as linhas agregadas (por colaborador) de um período — usado tanto pelo
+  // relatório ao vivo quanto para gerar o snapshot que é salvo no arquivo mensal.
+  function buildReportRows(range){
+    var byEmp = {};
+    employees.forEach(function(emp){ byEmp[emp.id] = {emp:emp, entries:[]}; });
+    log.forEach(function(e){
+      if(inRange(e.date, range)){
+        if(!byEmp[e.employeeId]) byEmp[e.employeeId] = {emp:{id:e.employeeId, nome:'(removido)', cargo:''}, entries:[]};
+        byEmp[e.employeeId].entries.push(e);
+      }
+    });
+    var rows = Object.keys(byEmp).map(function(id){ return byEmp[id]; })
+      .filter(function(r){ return r.entries.length>0; })
+      .sort(function(a,b){ return a.emp.nome.localeCompare(b.emp.nome); });
+
+    var out = [];
+    var totals = {checks:0, gaiolas:0, almoco:0, lider:0, ausente:0, outro:0};
+    rows.forEach(function(r){
+      var g=0, counts={almoco:0,lider:0,ausente:0,outro:0};
+      var lastJust = '';
+      r.entries.slice().sort(function(a,b){ return (a.date+a.time) < (b.date+b.time) ? -1 : 1; })
+        .forEach(function(e){
+          g += Number(e.gaiolas)||0;
+          if(counts[e.status]!==undefined) counts[e.status]++;
+          if(e.justificativa) lastJust = e.justificativa;
+        });
+      totals.checks += r.entries.length;
+      totals.gaiolas += g;
+      totals.almoco += counts.almoco;
+      totals.lider += counts.lider;
+      totals.ausente += counts.ausente;
+      totals.outro += counts.outro;
+      out.push({
+        nome: r.emp.nome, cargo: r.emp.cargo||'', checagens: r.entries.length, gaiolas: g,
+        almoco: counts.almoco, lider: counts.lider, ausente: counts.ausente, outro: counts.outro,
+        ultimaJustificativa: lastJust||''
+      });
+    });
+    return {rows: out, totals: totals};
+  }
+
+  function saveMonthReport(iso){
+    var key = monthKeyFromISO(iso);
+    var range = monthRangeFromISO(iso);
+    var built = buildReportRows(range);
+    var archive = loadArchive();
+    archive[key] = {
+      key: key,
+      range: range,
+      savedAt: new Date().toISOString(),
+      rows: built.rows,
+      totals: built.totals
+    };
+    saveArchiveObj(archive);
+    return archive[key];
+  }
+
+  function renderSavedReportsSelect(){
+    var sel = document.getElementById('saved-reports-select');
+    if(!sel) return;
+    var archive = loadArchive();
+    var keys = Object.keys(archive).sort().reverse();
+    var current = sel.value;
+    var html = '<option value="">— Relatório atual (ao vivo) —</option>';
+    keys.forEach(function(k){
+      html += '<option value="'+k+'">'+monthLabel(k)+' ('+archive[k].rows.length+' colaboradores)</option>';
+    });
+    sel.innerHTML = html;
+    if(keys.indexOf(current) >= 0) sel.value = current;
+  }
+
+  function setReportToolbarEnabled(enabled){
+    ['btn-save-month','report-date','btn-csv'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.disabled = !enabled;
+    });
+    document.querySelectorAll('#periodo-toggle button').forEach(function(b){ b.disabled = !enabled; });
+  }
+
+  function renderSavedReport(key){
+    var archive = loadArchive();
+    var snap = archive[key];
+    var body = document.getElementById('report-body');
+    var foot = document.getElementById('report-foot');
+    if(!snap){
+      document.getElementById('report-range').textContent = 'Relatório salvo não encontrado.';
+      body.innerHTML = '';
+      foot.innerHTML = '';
+      return;
+    }
+    document.getElementById('report-range').textContent =
+      'Relatório salvo de '+monthLabel(snap.key)+' — Período: '+formatBR(snap.range[0])+' até '+formatBR(snap.range[1])+
+      ' (salvo em '+new Date(snap.savedAt).toLocaleString('pt-BR')+')';
+
+    if(!snap.rows.length){
+      body.innerHTML = '<tr><td colspan="9" style="color:var(--muted);padding:16px;">Nenhuma checagem registrada nesse mês.</td></tr>';
+      foot.innerHTML = '';
+      return;
+    }
+    var html = '';
+    snap.rows.forEach(function(r){
+      html += '<tr>';
+      html += '<td>'+escapeHtml(r.nome)+'</td>';
+      html += '<td>'+escapeHtml(r.cargo||'—')+'</td>';
+      html += '<td class="num">'+r.checagens+'</td>';
+      html += '<td class="num">'+r.gaiolas+'</td>';
+      html += '<td class="num">'+r.almoco+'</td>';
+      html += '<td class="num">'+r.lider+'</td>';
+      html += '<td class="num">'+r.ausente+'</td>';
+      html += '<td class="num">'+r.outro+'</td>';
+      html += '<td>'+escapeHtml(r.ultimaJustificativa||'—')+'</td>';
+      html += '</tr>';
+    });
+    body.innerHTML = html;
+    var t = snap.totals;
+    foot.innerHTML = '<tr><td colspan="2">Totais</td>'+
+      '<td class="num">'+t.checks+'</td>'+
+      '<td class="num">'+t.gaiolas+'</td>'+
+      '<td class="num">'+t.almoco+'</td>'+
+      '<td class="num">'+t.lider+'</td>'+
+      '<td class="num">'+t.ausente+'</td>'+
+      '<td class="num">'+t.outro+'</td>'+
+      '<td></td></tr>';
+  }
+
+  function exportCsvRows(rows, filename){
+    var csv = rows.map(function(r){
+      return r.map(function(v){
+        var s = String(v).replace(/"/g,'""');
+        return /[",\n]/.test(s) ? '"'+s+'"' : s;
+      }).join(';');
+    }).join('\n');
+    var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  document.getElementById('btn-save-month').addEventListener('click', function(){
+    var iso = state.reportDate || todayISO();
+    var saved = saveMonthReport(iso);
+    renderSavedReportsSelect();
+    var info = document.getElementById('saved-report-info');
+    if(info) info.textContent = 'Relatório de '+monthLabel(saved.key)+' salvo em '+new Date(saved.savedAt).toLocaleString('pt-BR')+' — '+saved.rows.length+' colaboradores com checagem.';
+  });
+
+  document.getElementById('saved-reports-select').addEventListener('change', function(){
+    var key = this.value;
+    var delBtn = document.getElementById('btn-delete-saved');
+    var info = document.getElementById('saved-report-info');
+    if(!key){
+      state.viewingSavedKey = null;
+      if(delBtn) delBtn.style.display = 'none';
+      if(info) info.textContent = '';
+      setReportToolbarEnabled(true);
+      renderReport();
+      return;
+    }
+    state.viewingSavedKey = key;
+    if(delBtn) delBtn.style.display = 'inline-block';
+    if(info) info.textContent = '';
+    setReportToolbarEnabled(false);
+    renderSavedReport(key);
+  });
+
+  document.getElementById('btn-delete-saved').addEventListener('click', function(){
+    var sel = document.getElementById('saved-reports-select');
+    var key = sel.value;
+    if(!key) return;
+    if(!confirm('Excluir o relatório salvo de '+monthLabel(key)+'? Essa ação não pode ser desfeita.')) return;
+    var archive = loadArchive();
+    delete archive[key];
+    saveArchiveObj(archive);
+    state.viewingSavedKey = null;
+    renderSavedReportsSelect();
+    sel.value = '';
+    this.style.display = 'none';
+    setReportToolbarEnabled(true);
+    renderReport();
+  });
+
   function periodRange(){
     var d = new Date(state.reportDate+'T00:00:00');
     if(state.reportPeriod==='dia'){
@@ -2330,6 +2560,17 @@
   document.getElementById('btn-print').addEventListener('click', function(){ window.print(); });
 
   document.getElementById('btn-csv').addEventListener('click', function(){
+    if(state.viewingSavedKey){
+      var archive = loadArchive();
+      var snap = archive[state.viewingSavedKey];
+      if(!snap) return;
+      var savedRows = [['Colaborador','Cargo','Checagens','Gaiolas auditadas','Almo\u00E7o','Ativ. L\u00EDder','Ausente','Outro','\u00DAltima justificativa']];
+      snap.rows.forEach(function(r){
+        savedRows.push([r.nome, r.cargo, r.checagens, r.gaiolas, r.almoco, r.lider, r.ausente, r.outro, r.ultimaJustificativa]);
+      });
+      exportCsvRows(savedRows, 'relatorio-mensal_'+snap.key+'.csv');
+      return;
+    }
     var range = periodRange();
     var rows = [['Colaborador','Cargo','Data','Hora','Status','Gaiolas','Justificativa']];
     log.filter(function(e){ return inRange(e.date, range); })
@@ -2342,22 +2583,13 @@
           formatBR(e.date), e.time, STATUS[e.status].label, e.gaiolas, e.justificativa||''
         ]);
       });
-    var csv = rows.map(function(r){
-      return r.map(function(v){
-        var s = String(v).replace(/"/g,'""');
-        return /[",\n]/.test(s) ? '"'+s+'"' : s;
-      }).join(';');
-    }).join('\n');
-    var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'auditoria-carrinho_'+range[0]+'_a_'+range[1]+'.csv';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    exportCsvRows(rows, 'auditoria-carrinho_'+range[0]+'_a_'+range[1]+'.csv');
   });
 
   // ---------- Init ----------
   renderEmpList();
   renderEmpTable();
+  renderSavedReportsSelect();
 
   window.addEventListener('pageshow', function(){
     compactHours=[];
