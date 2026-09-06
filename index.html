@@ -2078,6 +2078,7 @@
   }
 
   function renderEmpList(){
+    aplicarSexoOficial(employees);
     renderScaleSummary();
     renderStats();
 
@@ -2446,19 +2447,49 @@
     return map;
   }
 
-  function normNome(v){
+  // ---------- Sexo oficial M/F embutido ----------
+  // Gerado a partir da lista enviada pelo usuário.
+  var SEXO_POR_NOME = {"janaina de lima araujo":"F","larroana lima simoes":"F","nicolas inacio da conceicao":"M","rafael da silva exposito":"M","daniel soares pereira":"M","juliane silva gouvea":"F","lucas raphael brandao de araujo":"M","thaciane oazem custodio":"F","vanderson mendes ferreira":"M","ernani junior de paula pinto":"M","gustavo dos santos soares":"M","isabelly figueredo de jesus":"F","kaique victorio dos santos":"M","michel dos santos da silva":"M","thais oliveira dos santos":"F","anderson detrano nunes":"M","caique belisario da silva campbell":"M","priscila souza da silva camilo":"F","rogerio oliveira de carvalho":"M","thiago felipe angelo braga":"M","aline do carmo olivera":"F","aline rodrigues sousa dos santos":"F","ana beatriz da silva":"F","ana carolina da silva torres":"F","ana clara canario franca":"F","andre luiz de lima":"M","andreza de franca martins":"F","bruna gomes dos santos":"F","caio thiago da silva martins barbosa":"M","eduarda de freitas lima":"F","fabiana da silva santos":"F","fabiana dos santos guarda":"F","geovanne de souza soares":"M","glauciene silva de sales":"F","isabella de sousa fonseca":"F","karina da silva gouvea":"F","lorane aguiar de maria":"F","marcilene do nascimento basilio":"F","myrela de souza molinaro":"F","rafael neto de amorim":"M","sergio ataide de brito junior":"M","soraya cesar bastos":"F","thais costa dos reis":"F","thamyris moreira nunes de castro":"F","vitoria nathalia felipe dias":"F","aretha rahyane martins cavalcante aguiar":"F","andre luiz costa ansel":"M","aparecida melane sales da silva":"F","beatriz manso ribeiro de almeida":"F","beatriz santos silva":"F","bianca teodoro de souza nascimento":"F","carina martins de oliveira":"F","carlos eduardo de souza":"M","claudia maria de oliveira de almeida santos":"F","eduardo junior da silva araujo":"M","fernando dos santos ferreira":"M","geovana grasielly xavier matos":"F","hilary alcantara da silva":"F","juliana de souza matheus":"F","ketlen godoy muniz viana da silva":"F","layla vieira da silva":"F","luzinete telles teixeira soares":"F","marcio faria da silva":"M","marcos vinicius pereira torres":"M","marta regina da silva lopes":"F","monique dos santos goudard":"F","paula nunes de miranda":"F","roberto carlos monteiro pereira":"M","sidney francisco magalhaes junior":"M","tiffani julia silva rangel":"F","wanderson dos santos nogueira fonseca":"M","adriano pereira pires":"M","bruna vitoria de souza lima":"F","bruno vital pacheco bianck":"M","christian haicony da silva dos santos":"M","cristiane rodrigues lucas":"F","daiana cristina soares bispo sudario":"F","dandara nascimento andre":"F","davidson batista de andrade":"M","dayana rodrigues dos santos":"F","debora cristina cardoso neves":"F","dryellen almeida pereira cavalcanti":"F","edinalva bento da silva":"F","edmilson silva de freitas":"M","esteffane santana":"F","evanice da silva ferreira":"F","fabio pereira henrique santos":"M","joana darc aud":"F","juliana da silva benevides":"F","lucila oliveira de azevedo nascimento":"F","mariana milene pecanha da silva":"F","raquel gabriele silva da conceicao":"F","roberto luiz gomes miranda":"M","thaina morais de souza paulo":"F","vivian correa goncalves de farias":"F","wagner leite da silva":"M","allison phelip lima da silva":"M","ana carolina monteiro da silva":"F","charles lopes de oliveira":"M","clarice maria ribeiro dantas da silva":"F","daiana ferreira nunes":"F","danilo martins silva oliveira":"M","davi rosa urbano da silva":"M","erica alencar amancio de brito":"F","evelyn souza de oliveira":"F","everton marcio dos santos":"M","fabio henrique da silva peres":"M","filipe mendes da silva":"M","flavia miguel dos santos":"F","francileide valentim de lima":"F","gabriel da cruz machado":"M","gabriel de araujo sanches":"M","gabriel domingos chalef cruz":"M","juliana conceicao de azevedo":"F","michel nascimento da conceicao":"M","nayara ribeiro de jesus":"F","nilson de almeida bello":"M","priscila diniz almeida":"F","thauana cristina da silva de almeida":"M","tiago da conceicao da silva":"M","veronica isidoro lopes":"F","alisson reis cardoso da silva":"M","davyse andrade rodrigues":"M","jonas william souza do nascimento":"M","jose roberto ferreira junior":"M","marcos aurelio dos santos correia":"M","marcos vitor moreira goncalves":"M","raphael cardoso dos santos":"M","vanderson spinelli da silva":"M","weverton dos santos moreira":"M","bruna cristina aragao miranda":"F","deivide william de jesus matos":"M","jennifer crystina souza da silva":"F","joao paulo da silva":"M","joao victor jimenes leitao":"M","joice vieira da silva":"F","joyce do nascimento vieira":"F","julia souza de freitas valle":"F","kauane da silva francisco sousa de sena":"F","kerolaynne beatryz ferreira de lima":"F","matheus de lima reis pinheiro":"M","yasmin rufino de souza":"F","aloyzio martins de souza filho":"M","andre roberto ladislau melo":"M","david de souza freitas":"M","dejailson valerio da silva":"M","flavio dos santos mesquita":"M","gabriel procopio da silva":"M","gabriel souza alves":"M","guilherme do nascimento vianna":"M","igor nascimento de sousa":"M","emilly luiza anastacio xavier":"F","ester cristina santos de menezes":"F","flavia do nascimento souza":"F","lais costa dos reis":"F","lara silva da costa":"F","leandro bastos duarte":"M","leiveti de lima sandes":"M","leonardo clementino de souza":"M","levi de sousa oliveira":"M","livia de souza lima":"F","luan da cruz costa":"M","vanessa gabrielle silva":"F","amanda de souza da silva braz":"F","andre luiz de oliveira francisco":"M","augusto lourenco ferreira":"M","cesar de jesus dos santos":"M","davyd matias honorato":"M","fulvio heleno sanches de lima":"M","marco aurelio coco da silva":"M","vinicius ferreira da silva":"M","william paulo houtet nascimento filho":"M","beatriz da silva goncalves":"F","bianca regina ferreira de meira lima campos":"F","flavia martins guimaraes agostinho":"M","giovana botelho barreto":"F","guaraciara seciliano":"F","heber dos santos lima bastos":"M","josimar teixeira rodrigues":"M","julia celia moura da silva":"F","luana arouxa coutinho de sousa":"F","luiz diogo mairink":"M","pedro henrique de souza lima":"M","ana carolina maroz de oliveira":"F","antonio carlos filano da silva":"M","danielle andreina mendes jose":"F","dulce olinda cabral ribeiro ricio":"F","gabriella navarro de magalhaes brandao":"F","jaqueline de andrade dos santos":"F","lucas dos santos silva":"M","lucas rangel samuel":"M","monique domingos da silva de almeida":"F","samara valeria medeiros de oliveira":"F","thais costa rosa":"F","thaynara barcelos de andrade":"F","veronica juliano bonavita da silva":"F","wagner silva de oliveira":"M","alan jorge correia carvalho":"M","allan jackson alves costa":"M","breno martins theodoro da silva":"M","caio carvalho de lima":"M","fabio alves de farias":"M","jeferson rosa queiroz":"M","jonathan carlos dias de paula":"M","jonathan luiz marques do nascimento":"M","marco aurelio dos santos":"M","amanda de vasconcelos teixeira":"F","amanda faria machado camilo":"F","ana caroline rodrigues da costa":"F","ariana souza santos porto":"F","cibele maria elias da silva sanches":"F","claudia de oliveira torres":"F","elisangela ferreira da silva":"F","euzilene vieira costa":"F","fatima luana da silva pires":"F","gessica pereira de santana machado":"F","guilherme davi macedo de souza":"M","gustavo gomes castro":"M","hugo oliveira monsores":"M","jackeline da conceicao dos santos de oliveira":"F","jaqueline lopes barbosa da silva":"F","joana dias salomao santos do nascimento":"F","jorge alberto silva santos junior":"M","kaique pereira de lima":"M","leticia da silva goncalves":"F","luana da silva dos santos":"F","marcos vinicius bastos dos santos":"M","mariana mendes de lima santos":"F","natalia francisco da silva":"F","natalia pereira da silva":"F","natielle bezerra da silva":"F","onildo pereira dos santos":"M","patrick michel do nascimento nogueira":"M","paulo macedo oliveira":"M","pedro felipe rodrigues sousa tavares cahe":"M","rafaela de morais lima":"F","rafaela francisco ribeiro":"F","raquel natacia souza batista da silva":"F","renan bezerra de souza":"M","rhenan gomes pereira":"M","rogerio luiz santos do nascimento":"M","ronei franklin da silva":"M","roselaine assumpcao da silva saddock de sa":"F","rosilene silva dos santos":"F","samuel jorge silva nascimento":"M","santhye marambaia dos reis lemos":"F","stefani da silva astrolabio":"F","sthefany morete conceicao":"F","suzana diniz santos de oliveira":"F","william thompson de azevedo":"M","yolanda dos santos":"F","yuri jimenes leitao":"M","zoraide juscelina da costa":"F","joyce sampaio dos santos":"F","maria luiza assis eugenio":"F","robson vieira pessoa":"M","tayane barcelos da silva":"F","mayara alves de oliveira":"F","agatha fernanda saluci da cruz":"F","ana alexia silva da paixao":"F","braian de jesus soares rodrigues":"M","caio vieira silva":"M","caroline da costa fortunato silva":"F","christian barcelos oliveira":"M","cleiton dantas andrade":"M","dandara cristina ferreira":"F","dayane de paula e silva":"M","gisele do nascimento castro":"F","heloisa silva":"F","jalos alexandre dos santos de jesus":"M","janiel bezerra da silva":"M","juliana rodrigues de campos christovao":"F","lais carneiro demetrio":"F","leticia angelo iglecia de almeida":"F","marina vaz da silva":"M","nathali souza ferreira":"F","paloma martins da silva":"F","priscila regiane anastacio rodrigues":"F","rildo da costa laurindo":"M","samuel oliveira da silva":"M","tamela de souza silva":"F","thayna fernandes dos santos":"F","vania flores de carvalho":"F","victor leandro rolemberg da silva":"M","vitoria soares do nascimento":"F","aprigio de souza lira":"M","luan gabriel dos santos montan":"M","rodrigo faria ferreira":"M","sara de souza peixoto":"F","sergio bezerra ponciano":"M","rafael silva de queiroz":"M","mario alberto vieira junior":"M","yan dos santos lemos":"M","beatriz germano da silva araujo":"F","camilla castro de souza amaral":"F","claudio augusto dos santos silva":"M","fernando da silva ferreira":"M","gabriel de oliveira silva":"M","indiara miranda perez":"F","jessica mendes pessanha almeida":"F","juan alexandre carvalho da silva":"M","larissa rodrigues leoncio da silva":"F","leonardo jose da silva e silva":"M","lorrainy caroliny oliveira martins de andrade":"F","luis paulo ferreira de lima dos santos":"M","luiz carlos anselmo de oliveira":"M","magno igor de melo ferreira":"M","marcellyn vitoria dos santos":"F","marcilene vitoria da silva miranda":"F","marcio jesus paixao":"M","maria eduarda da costa leal":"F","maria eduarda ferreira almeida da silva":"F","maria eduarda ramos de souza":"F","maria eduarda rezende geraldelle":"F","mariana marques barbosa dos reis":"F","maristela da silva":"F","marta gomes da silva":"F","mayara souza de andrade":"F","micael marins souto":"M","michelle da silva de mendonca":"F","nemicelia rodrigues de souza":"F","patricia francisca dos santos":"F","raiani cristini medeiros de jesus":"F","rayane ferreira dos santos":"F","savio carneiro da costa":"M","sthefany de souza da silva":"F","valdir zaria da silva do nascimento":"M","vanessa ribeiro da silva":"F","victoria silveira de oliveira pereira":"F","vitoria rodrigues sousa dos santos":"M","wendel pereira goncalves":"M","sarah figueira lima":"F","ana carolina ribeiro de freitas":"F","anna livia almeida da silva":"F","bruna caroline mendonca sponton":"F","caroline carlos dos santos pinto carvalho":"F","douglas ferreira anjos":"M","douglas santos de oliveira":"M","lucas freitas lima da silva":"M","rodolfo fernandes blazio junior":"M","tainara ribeiro da paixao":"F","thayna lima dos santos":"F","gabriel silva nicolau":"M","wedson soares lourenco":"M","ana luiza muniz santana":"F","christian andres rojas benavides":"M","davidson almeida maia":"M","fabricio goncalves de oliveira":"M","gracy kelly rodrigues remer":"F","mariana do nascimento militao":"F","tania regina de paula":"F","thayza roberta souza dos santos":"F","veronica oliveira da silva de melo":"F","antonia juliana ribeiro":"F","ewerton nascimento da silva":"M","thiago ferreira da silva":"M","alessandra de carvalho teixeira carlos":"F","andreia santiago teixeira":"F","bruno lima":"M","elidiane freitas octaviano nieto":"F","gabriella pessoa de lima da conceicao":"F","graltiele gonzaga de araujo":"F","joao victor da silva alves":"M","otavio luis rezende marcos":"M","vitoria da rocha ferreira":"F","wanderlei evaristo de castro":"M","luis rodrigues":"M","wendel de souza moreira":"M"};
+
+  function normNomeSexo(v){
     return String(v||'')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // remove acentos
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
       .toLowerCase()
-      .replace(/\./g,'')
+      .replace(/[^a-z0-9]+/g,' ')
       .replace(/\s+/g,' ')
       .trim();
+  }
+
+  function aplicarSexoOficial(lista){
+    var alterados=0, semCorrespondencia=[];
+    (lista||[]).forEach(function(emp){
+      var sx=SEXO_POR_NOME[normNomeSexo(emp.nome)];
+      if(sx){
+        if(emp.sexo!==sx){ emp.sexo=sx; alterados++; }
+      }else{
+        semCorrespondencia.push(emp.nome);
+      }
+    });
+    return {alterados:alterados, semCorrespondencia:semCorrespondencia};
+  }
+
+  function normNome(v){
+    return normNomeSexo(v);
   }
 
   document.getElementById('btn-import-sexo').addEventListener('click', function(){
     var raw = document.getElementById('sexo-paste-box').value;
     if(!raw.trim()) return;
-    var lines = raw.split('\n').map(function(l){ return l.replace(/\r$/,'').trim(); }).filter(Boolean);
+    var lines = raw.split('\n').map(function(l){
+      return l.replace(/\r$/,'')
+        .replace(/^\s*\|\s*/,'')
+        .replace(/\s*\|\s*$/,'')
+        .replace(/[\(\)\[\]]/g,'')
+        .replace(/\s+/g,' ')
+        .trim();
+    }).filter(function(l){
+      return l && !/^:?-+:?$/.test(l);
+    });
 
     var byName = {};
     employees.forEach(function(e){
@@ -2480,12 +2511,21 @@
       applied += matches.length;
     });
 
+    // Completa automaticamente os demais nomes pela lista oficial M/F embutida.
+    var auto = aplicarSexoOficial(employees);
+    applied += auto.alterados;
+
     save(LS_EMP, employees);
     document.getElementById('sexo-paste-box').value = '';
     renderEmpTable();
     renderEmpList();
 
-    var msg = applied+' colaborador(es) atualizado(s) com o Sexo.';
+    var semSexoAgora = employees.filter(function(e){ return e.sexo!=='M' && e.sexo!=='F'; });
+    var msg = applied+' atualização(ões) de Sexo aplicada(s).';
+    msg += '\n\nCom M/F: '+(employees.length-semSexoAgora.length)+' de '+employees.length+'.';
+    if(semSexoAgora.length){
+      msg += '\nAinda sem M/F: '+semSexoAgora.length+'.';
+    }
     if(notFound.length){
       msg += '\n\n'+notFound.length+' nome(s) não encontrado(s) no cadastro (confira grafia/acentos):\n'+notFound.slice(0,25).join('\n');
       if(notFound.length>25) msg += '\n... e mais '+(notFound.length-25)+'.';
