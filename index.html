@@ -2829,18 +2829,25 @@
     if(spinner) spinner.style.display = 'none';
   }
 
+  function comTimeout(promise, ms, msg){
+    return Promise.race([
+      promise,
+      new Promise(function(_, reject){ setTimeout(function(){ reject(new Error(msg||'Tempo esgotado')); }, ms); })
+    ]);
+  }
+
   async function boot(){
     if(!supabaseClient){
-      mostrarErroBoot('Não foi possível carregar a biblioteca do Supabase (sem internet?). Recarregue a página.');
+      mostrarErroBoot('Não foi possível carregar a biblioteca do Supabase (sem internet, ou algum bloqueio de rede/adblock). Recarregue a página.');
       return;
     }
     try{
-      await carregarColaboradoresIniciais();
-      await carregarLogInicial();
-      await carregarRelatoriosIniciais();
+      await comTimeout(carregarColaboradoresIniciais(), 15000, 'Tempo esgotado ao carregar colaboradores');
+      await comTimeout(carregarLogInicial(), 15000, 'Tempo esgotado ao carregar checagens');
+      await comTimeout(carregarRelatoriosIniciais(), 15000, 'Tempo esgotado ao carregar relatórios');
     }catch(e){
       console.error('Falha ao conectar no Supabase', e);
-      mostrarErroBoot('Não foi possível conectar ao banco de dados. Verifique sua internet e recarregue a página.');
+      mostrarErroBoot('Não foi possível conectar ao banco de dados (demorou demais ou a conexão falhou). Verifique sua internet — se estiver numa rede com bloqueio de sites, avise o TI — e recarregue a página.');
       return;
     }
     renderEmpList();
