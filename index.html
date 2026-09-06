@@ -725,6 +725,211 @@
   font-size:10px;color:#6680a0;margin-top:5px
 }
 
+
+/* ===== Cards-resumo dos status ===== */
+.compact-search{
+  min-width:220px !important;
+  width:260px !important;
+  max-width:260px !important;
+  margin-left:auto !important;
+}
+.status-summary-cards{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(120px,1fr));
+  gap:10px;
+  margin:8px 0 10px;
+}
+.status-summary-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#fff;
+  border:1px solid #dce8f3;
+  border-radius:12px;
+  padding:10px 12px;
+  box-shadow:0 5px 16px rgba(11,61,115,.06);
+}
+.status-summary-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex:none;
+}
+.status-summary-icon .ui-i svg{width:20px;height:20px}
+.status-summary-label{
+  font-size:10.5px;
+  font-weight:800;
+  color:#56779a;
+  margin-bottom:2px;
+}
+.status-summary-value{
+  font-size:22px;
+  line-height:1;
+  font-weight:900;
+  color:#0b315e;
+}
+.status-auditando .status-summary-icon{background:#dcf7ec;color:#168b70}
+.status-almoco .status-summary-icon{background:#fff0d7;color:#d08a0b}
+.status-lider .status-summary-icon{background:#eee7fa;color:#6a4e9e}
+.status-ausente .status-summary-icon{background:#ffe4e8;color:#c44858}
+.status-outro .status-summary-icon{background:#eaf0f6;color:#53657c}
+
+@media(max-width:950px){
+  .status-summary-cards{grid-template-columns:repeat(3,1fr)}
+  .compact-search{width:220px !important;max-width:220px !important}
+}
+@media(max-width:650px){
+  .status-summary-cards{grid-template-columns:repeat(2,1fr)}
+  .compact-search{width:100% !important;max-width:none !important;margin-left:0 !important}
+}
+
+
+/* ===== Cards exatamente entre Limpar horários e Pesquisa ===== */
+.compact-tools{
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  flex-wrap:wrap !important;
+  width:100% !important;
+  overflow:visible !important;
+}
+
+.inline-status-cards{
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  margin:0 !important;
+  flex:0 1 auto !important;
+}
+
+.inline-status-cards .status-summary-card{
+  width:76px !important;
+  min-width:76px !important;
+  height:42px !important;
+  min-height:42px !important;
+  padding:4px 6px !important;
+  gap:5px !important;
+  border-radius:8px !important;
+  box-shadow:none !important;
+}
+
+.inline-status-cards .status-summary-icon{
+  width:24px !important;
+  height:24px !important;
+  min-width:24px !important;
+  border-radius:6px !important;
+}
+
+.inline-status-cards .status-summary-icon .ui-i svg{
+  width:13px !important;
+  height:13px !important;
+}
+
+.inline-status-cards .status-summary-label{
+  font-size:7.8px !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+  margin:0 0 2px !important;
+}
+
+.inline-status-cards .status-summary-value{
+  font-size:14px !important;
+  line-height:1 !important;
+}
+
+.compact-search{
+  margin-left:auto !important;
+  width:220px !important;
+  min-width:180px !important;
+  max-width:220px !important;
+  flex:0 0 220px !important;
+}
+
+/* A tabela continua ocupando a largura inteira e nunca fica dentro da barra. */
+#emp-list,
+.compact-table-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  clear:both !important;
+}
+
+@media(max-width:1500px){
+  .inline-status-cards .status-summary-card{
+    width:68px !important;
+    min-width:68px !important;
+  }
+  .compact-search{
+    flex-basis:180px !important;
+    width:180px !important;
+  }
+}
+
+
+/* ===== POSIÇÃO EXATA SOLICITADA =====
+   horários | Limpar | 5 cards | Pesquisa
+*/
+.compact-tools{
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:nowrap !important;
+  gap:6px !important;
+  width:100% !important;
+  padding:7px 10px !important;
+  overflow:hidden !important;
+}
+.compact-tools > .hour-chip,
+.compact-tools > .hour-clear-btn{
+  flex:0 0 auto !important;
+}
+.inline-status-cards{
+  display:flex !important;
+  flex:1 1 auto !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  margin:0 !important;
+  min-width:0 !important;
+}
+.inline-status-cards .status-summary-card{
+  flex:0 1 92px !important;
+  width:92px !important;
+  min-width:72px !important;
+  height:38px !important;
+  min-height:38px !important;
+  padding:4px 6px !important;
+  gap:5px !important;
+  border-radius:8px !important;
+  box-shadow:none !important;
+}
+.inline-status-cards .status-summary-icon{
+  width:24px !important;
+  height:24px !important;
+  min-width:24px !important;
+  border-radius:6px !important;
+}
+.inline-status-cards .status-summary-label{
+  font-size:8px !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+.inline-status-cards .status-summary-value{
+  font-size:14px !important;
+  line-height:1 !important;
+}
+.compact-search{
+  order:99 !important;
+  flex:0 0 150px !important;
+  width:150px !important;
+  min-width:150px !important;
+  max-width:150px !important;
+  margin-left:0 !important;
+}
+#emp-list{
+  width:100% !important;
+  max-width:100% !important;
+  clear:both !important;
+}
+
 </style>
 </head>
 <body>
@@ -855,7 +1060,6 @@
   </div>
 
   <div class="compact-tools" id="compact-tools">
-      <strong>Auxiliar Logístico por horário <span style="font-weight:500;color:#6b83a0;">(pode marcar mais de um)</span>:</strong>
       <button class="hour-chip active" data-hour="TODOS">Todos</button>
       <button class="hour-chip" data-hour="05">5:00</button>
       <button class="hour-chip" data-hour="06">6:00</button>
@@ -863,9 +1067,34 @@
       <button class="hour-chip" data-hour="13">13:00</button>
       <button class="hour-chip" data-hour="14">14:00</button>
       <button class="hour-chip" data-hour="23">23:00</button>
-      <button class="hour-clear-btn" id="hour-clear-btn" type="button">Limpar horários</button>
-      <input class="compact-search" id="compact-search" type="search" placeholder="Pesquisar auxiliar pelo nome...">
+      <button class="hour-clear-btn" id="hour-clear-btn" type="button">Limpar</button>
+
+      <div class="status-summary-cards inline-status-cards" id="status-summary-cards">
+        <div class="status-summary-card status-auditando">
+          <div class="status-summary-icon" id="sum-icon-auditando"></div>
+          <div><div class="status-summary-label">Auditando</div><div class="status-summary-value" id="sum-auditando">0</div></div>
+        </div>
+        <div class="status-summary-card status-almoco">
+          <div class="status-summary-icon" id="sum-icon-almoco"></div>
+          <div><div class="status-summary-label">Almoço</div><div class="status-summary-value" id="sum-almoco">0</div></div>
+        </div>
+        <div class="status-summary-card status-lider">
+          <div class="status-summary-icon" id="sum-icon-lider"></div>
+          <div><div class="status-summary-label">Ativ. Líder</div><div class="status-summary-value" id="sum-lider">0</div></div>
+        </div>
+        <div class="status-summary-card status-ausente">
+          <div class="status-summary-icon" id="sum-icon-ausente"></div>
+          <div><div class="status-summary-label">Ausente</div><div class="status-summary-value" id="sum-ausente">0</div></div>
+        </div>
+        <div class="status-summary-card status-outro">
+          <div class="status-summary-icon" id="sum-icon-outro"></div>
+          <div><div class="status-summary-label">Outro</div><div class="status-summary-value" id="sum-outro">0</div></div>
+        </div>
+      </div>
+
+      <input class="compact-search" id="compact-search" type="search" placeholder="Pesquisa">
     </div>
+
     <div id="emp-list"></div>
 
   </section>
@@ -1237,10 +1466,6 @@
       if(r.error) console.error('Supabase: erro ao salvar checagem', r.error);
     }catch(e){ console.error('Supabase: falha ao salvar checagem', e); }
   }
-  function persistLogLocal(){
-    try{ localStorage.setItem(LS_LOG, JSON.stringify(log)); }catch(e){}
-  }
-
   async function syncLogDelete(ids){
     if(!supabaseClient) return;
     ids = Array.isArray(ids) ? ids : [ids];
@@ -1311,9 +1536,7 @@
       return copy;
     });
     employees = seed;
-    try{ localStorage.setItem(LS_EMP, JSON.stringify(seed)); }catch(e){}
-    // Sincroniza em segundo plano. A tela não fica presa esperando centenas de linhas.
-    syncEmployeesFull(seed);
+    await syncEmployeesFull(seed);
   }
   async function carregarLogInicial(){
     var sel = await supabaseClient.from('carrinho_audit_log').select('*');
@@ -1820,6 +2043,40 @@
     return code||'none';
   }
 
+  function renderStatusSummary(list){
+    var c={auditando:0,almoco:0,lider:0,ausente:0,outro:0};
+
+    (list||[]).forEach(function(emp){
+      var le=lastEntry(emp.id,state.date);
+      if(!le || !le.status) return;
+      if(c.hasOwnProperty(le.status)) c[le.status]++;
+    });
+
+    var ids={
+      auditando:'sum-auditando',
+      almoco:'sum-almoco',
+      lider:'sum-lider',
+      ausente:'sum-ausente',
+      outro:'sum-outro'
+    };
+    Object.keys(ids).forEach(function(k){
+      var el=document.getElementById(ids[k]);
+      if(el) el.textContent=c[k];
+    });
+
+    var icons={
+      auditando:'auditando',
+      almoco:'almoco',
+      lider:'lider',
+      ausente:'ausente',
+      outro:'outro'
+    };
+    Object.keys(icons).forEach(function(k){
+      var el=document.getElementById('sum-icon-'+k);
+      if(el) el.innerHTML=uiIcon(icons[k]);
+    });
+  }
+
   function renderEmpList(){
     renderScaleSummary();
     renderStats();
@@ -1837,6 +2094,8 @@
                String(emp.escala||'').toLowerCase().indexOf(q)>=0;
       });
     }
+
+    renderStatusSummary(list);
 
     var container=document.getElementById('emp-list');
     if(!list.length){
@@ -1928,7 +2187,7 @@
         log = log.filter(function(e){
           return !(String(e.employeeId)===String(empId) && e.date===state.date);
         });
-        persistLogLocal(); syncLogDelete(removidos.map(function(e){ return e.id; }));
+        syncLogDelete(removidos.map(function(e){ return e.id; }));
         renderEmpList();
       });
     });
@@ -2121,7 +2380,7 @@
         btn.addEventListener('click', function(){
           var id = btn.getAttribute('data-id');
           log = log.filter(function(e){ return e.id !== id; });
-          persistLogLocal(); syncLogDelete([id]);
+          syncLogDelete([id]);
           renderEmpList();
         });
       });
@@ -2798,46 +3057,64 @@
     if(ov){
       ov.hidden = true;
       ov.style.display = 'none';
+      ov.setAttribute('aria-hidden','true');
     }
   }
-  function mostrarAvisoBanco(msg){
-    console.warn(msg);
-    var stamp = document.getElementById('last-update-stamp');
-    if(stamp) stamp.textContent = 'modo local';
-  }
-  function cloneSeedEmployees(){
-    return SEED_EMPLOYEES.map(function(e){
-      var copy={};
-      Object.keys(e).forEach(function(k){ copy[k]=e[k]; });
-      return copy;
-    });
-  }
-  function carregarFallbackLocal(){
-    var cachedEmp=[];
-    var cachedLog=[];
-    try{ cachedEmp=JSON.parse(localStorage.getItem(LS_EMP)||'[]')||[]; }catch(e){ cachedEmp=[]; }
-    try{ cachedLog=JSON.parse(localStorage.getItem(LS_LOG)||'[]')||[]; }catch(e){ cachedLog=[]; }
-
-    employees = cachedEmp.length ? cachedEmp : cloneSeedEmployees();
-    log = Array.isArray(cachedLog) ? cachedLog : [];
-    reportsArchive = reportsArchive || {};
-  }
-  function renderInicialSeguro(){
-    try{ renderEmpList(); }catch(e){ console.error('Erro ao renderizar auditoria',e); }
-    try{ renderEmpTable(); }catch(e){ console.error('Erro ao renderizar colaboradores',e); }
-    try{ renderSavedReportsSelect(); }catch(e){ console.error('Erro ao renderizar relatórios salvos',e); }
-  }
-  function timeoutPromise(ms){
-    return new Promise(function(_,reject){
-      setTimeout(function(){ reject(new Error('timeout')); },ms);
-    });
+  function mostrarErroBoot(msg){
+    var txt = document.getElementById('boot-overlay-text');
+    if(txt) txt.textContent = msg;
+    var spinner = document.querySelector('#boot-overlay > div[style*="border-top-color"]');
+    if(spinner) spinner.style.display = 'none';
   }
 
-  async function atualizarDoBancoEmSegundoPlano(){
+
+  function carregarFallbackLocalImediato(){
+    try{
+      var empCache = JSON.parse(localStorage.getItem(LS_EMP) || '[]');
+      if(Array.isArray(empCache) && empCache.length){
+        employees = empCache;
+      }else if(!employees || !employees.length){
+        employees = SEED_EMPLOYEES.map(function(e){
+          var c={}; Object.keys(e).forEach(function(k){ c[k]=e[k]; }); return c;
+        });
+      }
+    }catch(e){
+      if(!employees || !employees.length){
+        employees = SEED_EMPLOYEES.map(function(x){
+          var c={}; Object.keys(x).forEach(function(k){ c[k]=x[k]; }); return c;
+        });
+      }
+    }
+
+    try{
+      var logCache = JSON.parse(localStorage.getItem(LS_LOG) || '[]');
+      if(Array.isArray(logCache)) log = logCache;
+    }catch(e){}
+  }
+
+  function renderFallbackSeguro(){
+    try{ renderEmpList(); }catch(e){ console.error('Falha renderEmpList',e); }
+    try{ renderEmpTable(); }catch(e){ console.error('Falha renderEmpTable',e); }
+    try{ renderSavedReportsSelect(); }catch(e){ console.error('Falha renderSavedReportsSelect',e); }
+  }
+
+  function promessaTimeout(ms){
+    return new Promise(function(_, reject){
+      setTimeout(function(){ reject(new Error('Tempo limite do banco excedido')); }, ms);
+    });
+  }
+
+  async function boot(){
+    // A tela abre primeiro com cache/seed; o banco nunca mais bloqueia a página.
+    carregarFallbackLocalImediato();
+    renderFallbackSeguro();
+    esconderBootOverlay();
+
     if(!supabaseClient){
-      mostrarAvisoBanco('Supabase indisponível. App aberto em modo local.');
+      console.warn('Supabase indisponível: mantendo modo local.');
       return;
     }
+
     try{
       await Promise.race([
         (async function(){
@@ -2845,40 +3122,21 @@
           await carregarLogInicial();
           await carregarRelatoriosIniciais();
         })(),
-        timeoutPromise(8000)
+        promessaTimeout(8000)
       ]);
 
-      // Guarda uma cópia local para que a próxima abertura seja instantânea.
-      try{ localStorage.setItem(LS_EMP,JSON.stringify(employees)); }catch(e){}
-      try{ localStorage.setItem(LS_LOG,JSON.stringify(log)); }catch(e){}
+      // Salva uma cópia local para a próxima abertura ser instantânea.
+      try{ localStorage.setItem(LS_EMP, JSON.stringify(employees)); }catch(e){}
+      try{ localStorage.setItem(LS_LOG, JSON.stringify(log)); }catch(e){}
 
-      renderInicialSeguro();
-      try{ renderReport(); }catch(e){}
+      renderFallbackSeguro();
     }catch(e){
-      console.warn('Banco não respondeu a tempo; mantendo dados locais.',e);
-      mostrarAvisoBanco('Banco indisponível temporariamente. Usando dados locais.');
+      console.warn('Banco demorou ou falhou; app continua com os dados locais.', e);
     }
   }
 
-  function boot(){
-    // Primeiro mostra a aplicação. O banco não pode mais travar a abertura da página.
-    carregarFallbackLocal();
-    renderInicialSeguro();
-    esconderBootOverlay();
-
-    // Depois tenta atualizar com o Supabase sem bloquear a interface.
-    setTimeout(function(){ atualizarDoBancoEmSegundoPlano(); },0);
-  }
-
-  // Segurança extra: mesmo que alguma rotina futura falhe, o overlay nunca fica eterno.
-  setTimeout(function(){
-    var ov=document.getElementById('boot-overlay');
-    if(ov && ov.style.display!=='none'){
-      carregarFallbackLocal();
-      renderInicialSeguro();
-      esconderBootOverlay();
-    }
-  },2500);
+  // Segurança extra contra tela presa por qualquer motivo.
+  setTimeout(function(){ esconderBootOverlay(); }, 2500);
 
   boot();
 
