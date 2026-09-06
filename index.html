@@ -1528,6 +1528,15 @@
     if(sel.error){ throw sel.error; }
     if(sel.data && sel.data.length){
       employees = sel.data.map(rowToEmp);
+
+      // Preenche M/F em TODOS os colaboradores já existentes no Supabase
+      // e grava de volta no banco antes de continuar.
+      var sexoResult = aplicarSexoOficial(employees);
+      if(sexoResult.alterados > 0){
+        await syncEmployeesFull(employees);
+        try{ localStorage.setItem(LS_EMP, JSON.stringify(employees)); }catch(e){}
+        console.log('Sexo M/F sincronizado no banco:', sexoResult.alterados);
+      }
       return;
     }
     var seed = SEED_EMPLOYEES.map(function(e){
@@ -2672,6 +2681,13 @@
   }
 
   function renderEmpTable(){
+    // Garante que a coluna Sexo nunca seja renderizada vazia quando o nome
+    // existe na relação oficial M/F.
+    var sexoTabela = aplicarSexoOficial(employees);
+    if(sexoTabela.alterados > 0){
+      syncEmployeesFull(employees);
+      try{ localStorage.setItem(LS_EMP, JSON.stringify(employees)); }catch(e){}
+    }
     document.getElementById('emp-count').textContent = employees.length;
     var body = document.getElementById('emp-table-body');
     if(employees.length===0){
