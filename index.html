@@ -479,17 +479,9 @@
 }
 .hour-chip.active{background:#0b78f0;border-color:#0b78f0;color:#fff}
 .compact-search{
-  margin-left:auto;min-width:150px;max-width:220px;flex:1 1 150px;border:1px solid #cfe0ef;border-radius:9px;
+  margin-left:auto;min-width:290px;border:1px solid #cfe0ef;border-radius:9px;
   padding:8px 11px;font-size:12px;color:#173e6b;background:#fff
 }
-.mini-stats{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.mini-stat{
-  display:flex;align-items:center;gap:5px;white-space:nowrap;
-  border:1px solid #dce8f3;border-left:3px solid var(--c,#647085);
-  background:#f8fbff;border-radius:7px;padding:4px 9px 4px 8px;
-  font-size:11px;font-weight:700;color:#4a5a70;
-}
-.mini-stat .mini-stat-n{font-size:13px;font-weight:800;color:var(--c,#173e6b);}
 .compact-table-wrap{
   background:#fff;border:1px solid #dce8f3;border-radius:14px;
   overflow:hidden;box-shadow:var(--shadow2)
@@ -872,13 +864,6 @@
       <button class="hour-chip" data-hour="14">14:00</button>
       <button class="hour-chip" data-hour="23">23:00</button>
       <button class="hour-clear-btn" id="hour-clear-btn" type="button">Limpar horários</button>
-      <div class="mini-stats" id="mini-stats">
-        <div class="mini-stat" style="--c:var(--auditando)"><span class="mini-stat-n" id="ms-auditando">0</span><span>Auditando</span></div>
-        <div class="mini-stat" style="--c:var(--almoco)"><span class="mini-stat-n" id="ms-almoco">0</span><span>Almoço</span></div>
-        <div class="mini-stat" style="--c:var(--lider)"><span class="mini-stat-n" id="ms-lider">0</span><span>Líder</span></div>
-        <div class="mini-stat" style="--c:var(--ausente)"><span class="mini-stat-n" id="ms-ausente">0</span><span>Ausente</span></div>
-        <div class="mini-stat" style="--c:var(--outro)"><span class="mini-stat-n" id="ms-outro">0</span><span>Outro</span></div>
-      </div>
       <input class="compact-search" id="compact-search" type="search" placeholder="Pesquisar auxiliar pelo nome...">
     </div>
     <div id="emp-list"></div>
@@ -1123,6 +1108,7 @@
   // continua sendo chamado do mesmo jeito de sempre (save(LS_EMP, employees)), só que
   // agora sincroniza com o Supabase em vez do localStorage.
   function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
     if(key === LS_EMP){ syncEmployeesFull(val); }
   }
 
@@ -1251,6 +1237,10 @@
       if(r.error) console.error('Supabase: erro ao salvar checagem', r.error);
     }catch(e){ console.error('Supabase: falha ao salvar checagem', e); }
   }
+  function persistLogLocal(){
+    try{ localStorage.setItem(LS_LOG, JSON.stringify(log)); }catch(e){}
+  }
+
   async function syncLogDelete(ids){
     if(!supabaseClient) return;
     ids = Array.isArray(ids) ? ids : [ids];
@@ -1321,7 +1311,9 @@
       return copy;
     });
     employees = seed;
-    await syncEmployeesFull(seed);
+    try{ localStorage.setItem(LS_EMP, JSON.stringify(seed)); }catch(e){}
+    // Sincroniza em segundo plano. A tela não fica presa esperando centenas de linhas.
+    syncEmployeesFull(seed);
   }
   async function carregarLogInicial(){
     var sel = await supabaseClient.from('carrinho_audit_log').select('*');
@@ -1577,6 +1569,7 @@
   }
   function addLogEntry(entry){
     log.push(entry);
+    try{ localStorage.setItem(LS_LOG, JSON.stringify(log)); }catch(e){}
     syncLogUpsert(entry);
   }
 
@@ -1609,23 +1602,6 @@
   }
   function statCard(n,l){
     return '<div class="stat-card"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';
-  }
-
-  // Cards pequenos (Auditando/Almoço/Líder/Ausente/Outro) mostrados ao lado da busca
-  // por nome, na aba Auditoria de Hoje — contam pelo status atual de cada colaborador
-  // escalado no filtro de escala/horário selecionado (mesma base da lista de cards).
-  function renderMiniStats(){
-    var counts = {auditando:0, almoco:0, lider:0, ausente:0, outro:0};
-    filteredEmployees().filter(isAuxiliarLogistico).forEach(function(emp){
-      var le = lastEntry(emp.id, state.date);
-      var st = le ? le.status : 'auditando';
-      if(counts[st]===undefined) st='outro';
-      counts[st]++;
-    });
-    STATUS_ORDER.forEach(function(k){
-      var el = document.getElementById('ms-'+k);
-      if(el) el.textContent = counts[k];
-    });
   }
 
   // ---------- Employees filter ----------
@@ -1847,7 +1823,6 @@
   function renderEmpList(){
     renderScaleSummary();
     renderStats();
-    renderMiniStats();
 
     var list=filteredEmployees().filter(isAuxiliarLogistico);
 
@@ -1953,7 +1928,7 @@
         log = log.filter(function(e){
           return !(String(e.employeeId)===String(empId) && e.date===state.date);
         });
-        syncLogDelete(removidos.map(function(e){ return e.id; }));
+        persistLogLocal(); syncLogDelete(removidos.map(function(e){ return e.id; }));
         renderEmpList();
       });
     });
@@ -2146,7 +2121,7 @@
         btn.addEventListener('click', function(){
           var id = btn.getAttribute('data-id');
           log = log.filter(function(e){ return e.id !== id; });
-          syncLogDelete([id]);
+          persistLogLocal(); syncLogDelete([id]);
           renderEmpList();
         });
       });
@@ -2820,41 +2795,91 @@
   // ---------- Init ----------
   function esconderBootOverlay(){
     var ov = document.getElementById('boot-overlay');
-    if(ov) ov.hidden = true;
+    if(ov){
+      ov.hidden = true;
+      ov.style.display = 'none';
+    }
   }
-  function mostrarErroBoot(msg){
-    var txt = document.getElementById('boot-overlay-text');
-    if(txt) txt.textContent = msg;
-    var spinner = document.querySelector('#boot-overlay > div[style*="border-top-color"]');
-    if(spinner) spinner.style.display = 'none';
+  function mostrarAvisoBanco(msg){
+    console.warn(msg);
+    var stamp = document.getElementById('last-update-stamp');
+    if(stamp) stamp.textContent = 'modo local';
+  }
+  function cloneSeedEmployees(){
+    return SEED_EMPLOYEES.map(function(e){
+      var copy={};
+      Object.keys(e).forEach(function(k){ copy[k]=e[k]; });
+      return copy;
+    });
+  }
+  function carregarFallbackLocal(){
+    var cachedEmp=[];
+    var cachedLog=[];
+    try{ cachedEmp=JSON.parse(localStorage.getItem(LS_EMP)||'[]')||[]; }catch(e){ cachedEmp=[]; }
+    try{ cachedLog=JSON.parse(localStorage.getItem(LS_LOG)||'[]')||[]; }catch(e){ cachedLog=[]; }
+
+    employees = cachedEmp.length ? cachedEmp : cloneSeedEmployees();
+    log = Array.isArray(cachedLog) ? cachedLog : [];
+    reportsArchive = reportsArchive || {};
+  }
+  function renderInicialSeguro(){
+    try{ renderEmpList(); }catch(e){ console.error('Erro ao renderizar auditoria',e); }
+    try{ renderEmpTable(); }catch(e){ console.error('Erro ao renderizar colaboradores',e); }
+    try{ renderSavedReportsSelect(); }catch(e){ console.error('Erro ao renderizar relatórios salvos',e); }
+  }
+  function timeoutPromise(ms){
+    return new Promise(function(_,reject){
+      setTimeout(function(){ reject(new Error('timeout')); },ms);
+    });
   }
 
-  function comTimeout(promise, ms, msg){
-    return Promise.race([
-      promise,
-      new Promise(function(_, reject){ setTimeout(function(){ reject(new Error(msg||'Tempo esgotado')); }, ms); })
-    ]);
-  }
-
-  async function boot(){
+  async function atualizarDoBancoEmSegundoPlano(){
     if(!supabaseClient){
-      mostrarErroBoot('Não foi possível carregar a biblioteca do Supabase (sem internet, ou algum bloqueio de rede/adblock). Recarregue a página.');
+      mostrarAvisoBanco('Supabase indisponível. App aberto em modo local.');
       return;
     }
     try{
-      await comTimeout(carregarColaboradoresIniciais(), 15000, 'Tempo esgotado ao carregar colaboradores');
-      await comTimeout(carregarLogInicial(), 15000, 'Tempo esgotado ao carregar checagens');
-      await comTimeout(carregarRelatoriosIniciais(), 15000, 'Tempo esgotado ao carregar relatórios');
+      await Promise.race([
+        (async function(){
+          await carregarColaboradoresIniciais();
+          await carregarLogInicial();
+          await carregarRelatoriosIniciais();
+        })(),
+        timeoutPromise(8000)
+      ]);
+
+      // Guarda uma cópia local para que a próxima abertura seja instantânea.
+      try{ localStorage.setItem(LS_EMP,JSON.stringify(employees)); }catch(e){}
+      try{ localStorage.setItem(LS_LOG,JSON.stringify(log)); }catch(e){}
+
+      renderInicialSeguro();
+      try{ renderReport(); }catch(e){}
     }catch(e){
-      console.error('Falha ao conectar no Supabase', e);
-      mostrarErroBoot('Não foi possível conectar ao banco de dados (demorou demais ou a conexão falhou). Verifique sua internet — se estiver numa rede com bloqueio de sites, avise o TI — e recarregue a página.');
-      return;
+      console.warn('Banco não respondeu a tempo; mantendo dados locais.',e);
+      mostrarAvisoBanco('Banco indisponível temporariamente. Usando dados locais.');
     }
-    renderEmpList();
-    renderEmpTable();
-    renderSavedReportsSelect();
-    esconderBootOverlay();
   }
+
+  function boot(){
+    // Primeiro mostra a aplicação. O banco não pode mais travar a abertura da página.
+    carregarFallbackLocal();
+    renderInicialSeguro();
+    esconderBootOverlay();
+
+    // Depois tenta atualizar com o Supabase sem bloquear a interface.
+    setTimeout(function(){ atualizarDoBancoEmSegundoPlano(); },0);
+  }
+
+  // Segurança extra: mesmo que alguma rotina futura falhe, o overlay nunca fica eterno.
+  setTimeout(function(){
+    var ov=document.getElementById('boot-overlay');
+    if(ov && ov.style.display!=='none'){
+      carregarFallbackLocal();
+      renderInicialSeguro();
+      esconderBootOverlay();
+    }
+  },2500);
+
   boot();
 
   window.addEventListener('pageshow', function(){
